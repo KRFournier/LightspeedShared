@@ -22,16 +22,6 @@ public sealed class Score
     public int? Seed { get; set; }
 
     /// <summary>
-    /// A match reference is used when the participant in this match is determined by the outcome of a previous match.
-    /// </summary>
-    public Guid? ParentMatchId { get; set; }
-
-    /// <summary>
-    /// The participant to use from the referenced match, either the winner or the loser
-    /// </summary>
-    public MatchOutcome? ParentMatchReference { get; set; }
-
-    /// <summary>
     /// The number of minor violations this match
     /// </summary>
     public int MinorViolations { get; set; } = 0;

@@ -1,0 +1,41 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:conv="clr-namespace:Lightspeed.Converters">
+
+	<Styles.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/ButtonTemplate.axaml"/>
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/ToggleButtonTemplate.axaml"/>
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/HoldButtonTemplate.axaml"/>
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/CheckBoxTemplate.axaml"/>
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/RadioButtonTemplate.axaml"/>
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/TextBoxTemplate.axaml"/>
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/ComboBoxTemplate.axaml" />
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/CalendarDatePickerTemplate.axaml"/>
+				<MergeResourceInclude Source="avares://LightspeedShared/Templates/AutoCompleteBoxTemplate.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
+			<FontFamily x:Key="Prototype">avares://LightspeedShared/Assets/Fonts#Prototype</FontFamily>
+			<FontFamily x:Key="Electrolize">avares://LightspeedShared/Assets/Fonts#Electrolize</FontFamily>
+			<conv:RadioButtonValueConverter x:Key="RadioValue"/>
+			<conv:TrueToFadedConverter x:Key="TrueToFaded"/>
+			<conv:TrueToInvisibleConverter x:Key="TrueToInvis"/>
+			<conv:StringsAreEqualConverter x:Key="StringsEqual"/>
+			<conv:WeaponToColorConverter x:Key="WeaponToColor"/>
+			<conv:UppercaseConverter x:Key="Uppercase"/>
+			<conv:CommaListConverter x:Key="CommaList"/>
+		</ResourceDictionary>
+	</Styles.Resources>
+
+    <StyleInclude Source="avares://LightspeedShared/Styles/Colors.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/Icons.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/Graphics.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/Animations.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/LightspeedBorderStyles.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/SimpleLightspeedBorderStyles.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/ButtonStyles.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/HoldButtonStyles.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/TextBlockStyles.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/TextBoxStyles.axaml" />
+
+</Styles>

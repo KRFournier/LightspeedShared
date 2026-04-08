@@ -13,9 +13,19 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Style", "IDE0130:Namespace does not match folder structure",
     Justification = "Lightspeed is a global namespace and LightspeedShared is meant to contain globally shared items.",
     Scope = "namespace",
-    Target = "~N:Lightspeed.Models")]
+    Target = "~N:Lightspeed.ViewModels")]
 
 [assembly: SuppressMessage("Style", "IDE0130:Namespace does not match folder structure",
     Justification = "Lightspeed is a global namespace and LightspeedShared is meant to contain globally shared items.",
     Scope = "namespace",
     Target = "~N:Lightspeed.Network")]
+
+[assembly: SuppressMessage("Style", "IDE0130:Namespace does not match folder structure",
+    Justification = "Lightspeed is a global namespace and LightspeedShared is meant to contain globally shared items.",
+    Scope = "namespace",
+    Target = "~N:Lightspeed.Messages")]
+
+[assembly: SuppressMessage("Style", "IDE0130:Namespace does not match folder structure",
+    Justification = "Lightspeed is a global namespace and LightspeedShared is meant to contain globally shared items.",
+    Scope = "namespace",
+    Target = "~N:Lightspeed.Services")]

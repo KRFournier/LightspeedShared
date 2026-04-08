@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Lightspeed.ViewModels"
+			 xmlns:v="clr-namespace:Lightspeed.Views"
+			 xmlns:c="clr-namespace:Lightspeed.Controls"
+             mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="450"
+             x:Class="Lightspeed.Dialogs.SelectDialog"
+			 KeyDown="UserControl_KeyDown">
+
+	<Grid RowDefinitions="Auto,10,*,10,Auto" HorizontalAlignment="Center">
+
+		<!--Title-->
+		<TextBlock x:Name="TitleTextBlock"
+			       Classes="large"
+				   HorizontalAlignment="Center"/>
+
+		<!--Content-->
+		<c:LightspeedBorder Classes="color darkback"
+					        Grid.Row="2"
+							Padding="0">
+			<ScrollViewer>
+				<ContentControl Margin="20" x:Name="ContentControl"/>
+			</ScrollViewer>
+		</c:LightspeedBorder>
+
+		<!--Buttons-->
+		<Button x:Name="CancelButton"
+		        Classes="red"
+				Grid.Row="4"
+				Width="75"
+				Click="Cancel_Click">
+			<TextBlock Classes="large" Text="Cancel" HorizontalAlignment="Center"/>
+		</Button>
+
+	</Grid>
+	
+</UserControl>

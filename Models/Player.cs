@@ -21,6 +21,7 @@ public sealed class Player : IParticipant
     public WeaponClass WeaponOfChoice { get; set; } = WeaponClass.Rey;
 
     public int StartingLife { get; set; } = 0;
+    public bool ShowWeapon { get; set; } = false;
 
     [BsonIgnore]
     public string Name => $"{FirstName} {LastName}";
