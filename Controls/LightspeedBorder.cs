@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Utilities;
+using Lightspeed.Utilities;
 
 namespace Lightspeed.Controls;
 
@@ -262,7 +262,7 @@ public class LightspeedBorder : Decorator
                 var borderThickness = BorderThickness;
 
                 if (UseLayoutRounding)
-                    borderThickness = LayoutHelper.RoundLayoutThickness(borderThickness, _scale, _scale);
+                    borderThickness = LayoutHelper.RoundLayoutThickness(borderThickness, _scale);
 
                 _layoutThickness = borderThickness;
             }

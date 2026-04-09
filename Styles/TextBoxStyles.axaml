@@ -37,4 +37,24 @@
 		</Style>
 	</Style>
 	
+	<Style Selector="TextBox.required">
+		<Setter Property="BorderBrush" Value="{StaticResource OrangeBrush}"/>
+		<Style Selector="^ /template/ c|LightspeedBorder#PART_BorderElement">
+			<Setter Property="TopLeftBorderBrush" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBorderBrush" Value="{StaticResource OrangeBrush}"/>
+		</Style>
+		<Style Selector="^:pointerover /template/ c|LightspeedBorder#PART_BorderElement">
+			<Setter Property="TopLeftBackground" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="TopLeftBorderBrush" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBackground" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBorderBrush" Value="{StaticResource OrangeBrush}"/>
+		</Style>
+		<Style Selector="^:focus /template/ c|LightspeedBorder#PART_BorderElement">
+			<Setter Property="TopLeftBackground" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="TopLeftBorderBrush" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBackground" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBorderBrush" Value="{StaticResource OrangeBrush}"/>
+		</Style>
+	</Style>
+	
 </Styles>

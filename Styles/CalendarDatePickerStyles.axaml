@@ -1,0 +1,29 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:c="clr-namespace:Lightspeed.Controls">
+
+	<Design.PreviewWith>
+		<Border Padding="20">
+			<StackPanel Spacing="20" Width="300">
+				<CalendarDatePicker />
+			</StackPanel>
+		</Border>
+	</Design.PreviewWith>
+
+	<Style Selector="CalendarDatePicker.required">
+		<Setter Property="BorderBrush" Value="{StaticResource OrangeBrush}"/>
+		<Style Selector="^:pointerover /template/ c|LightspeedBorder#Background">
+			<Setter Property="TopLeftBackground" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="TopLeftBorderBrush" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBackground" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBorderBrush" Value="{StaticResource OrangeBrush}"/>
+		</Style>
+		<Style Selector="^:focus /template/ c|LightspeedBorder#Background">
+			<Setter Property="TopLeftBackground" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="TopLeftBorderBrush" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBackground" Value="{StaticResource OrangeBrush}"/>
+			<Setter Property="BottomRightBorderBrush" Value="{StaticResource OrangeBrush}"/>
+		</Style>
+	</Style>
+	
+</Styles>

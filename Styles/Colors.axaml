@@ -109,6 +109,13 @@
 			<GradientStop Color="{StaticResource SaberSportGreen}" Offset="0.0"/>
 			<GradientStop Color="Black" Offset="1.0"/>
 		</RadialGradientBrush>
+
+		<LinearGradientBrush x:Key="LightspeedBack">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="#0F0F0F" Offset="0.0"/>
+				<GradientStop Color="#2F2F2F" Offset="1.0"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
 			
 	</Styles.Resources>
 	

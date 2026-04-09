@@ -29,7 +29,6 @@
 
     <StyleInclude Source="avares://LightspeedShared/Styles/Colors.axaml" />
 	<StyleInclude Source="avares://LightspeedShared/Styles/Icons.axaml" />
-	<StyleInclude Source="avares://LightspeedShared/Styles/Graphics.axaml" />
 	<StyleInclude Source="avares://LightspeedShared/Styles/Animations.axaml" />
 	<StyleInclude Source="avares://LightspeedShared/Styles/LightspeedBorderStyles.axaml" />
 	<StyleInclude Source="avares://LightspeedShared/Styles/SimpleLightspeedBorderStyles.axaml" />
@@ -37,5 +36,6 @@
 	<StyleInclude Source="avares://LightspeedShared/Styles/HoldButtonStyles.axaml" />
 	<StyleInclude Source="avares://LightspeedShared/Styles/TextBlockStyles.axaml" />
 	<StyleInclude Source="avares://LightspeedShared/Styles/TextBoxStyles.axaml" />
+	<StyleInclude Source="avares://LightspeedShared/Styles/CalendarDatePickerStyles.axaml" />
 
 </Styles>

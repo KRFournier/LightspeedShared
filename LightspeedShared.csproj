@@ -11,11 +11,11 @@
     <AvaloniaXaml Remove="Styles\AutoCompleteBoxTemplate.axaml" />
     <AvaloniaXaml Remove="Styles\ButtonStyles.axaml" />
     <AvaloniaXaml Remove="Styles\ButtonTemplate.axaml" />
+    <AvaloniaXaml Remove="Styles\CalendarDatePickerStyles.axaml" />
     <AvaloniaXaml Remove="Styles\CalendarDatePickerTemplate.axaml" />
     <AvaloniaXaml Remove="Styles\CheckBoxTemplate.axaml" />
     <AvaloniaXaml Remove="Styles\Colors.axaml" />
     <AvaloniaXaml Remove="Styles\ComboBoxTemplate.axaml" />
-    <AvaloniaXaml Remove="Styles\Graphics.axaml" />
     <AvaloniaXaml Remove="Styles\HoldButtonStyles.axaml" />
     <AvaloniaXaml Remove="Styles\HoldButtonTemplate.axaml" />
     <AvaloniaXaml Remove="Styles\Icons.axaml" />
@@ -37,6 +37,7 @@
     <AvaloniaResource Include="Assets\Fonts\Electrolize\Electrolize-Regular.ttf" />
     <AvaloniaResource Include="Assets\Fonts\Prototype\Prototype.ttf" />
     <AvaloniaResource Include="Styles\Animations.axaml" />
+    <AvaloniaResource Include="Styles\CalendarDatePickerStyles.axaml" />
     <AvaloniaResource Include="Templates\AutoCompleteBoxTemplate.axaml" />
     <AvaloniaResource Include="Styles\ButtonStyles.axaml" />
     <AvaloniaResource Include="Templates\ButtonTemplate.axaml" />
@@ -44,7 +45,6 @@
     <AvaloniaResource Include="Templates\CheckBoxTemplate.axaml" />
     <AvaloniaResource Include="Styles\Colors.axaml" />
     <AvaloniaResource Include="Templates\ComboBoxTemplate.axaml" />
-    <AvaloniaResource Include="Styles\Graphics.axaml" />
     <AvaloniaResource Include="Styles\HoldButtonStyles.axaml" />
     <AvaloniaResource Include="Templates\HoldButtonTemplate.axaml" />
     <AvaloniaResource Include="Styles\Icons.axaml" />
@@ -58,8 +58,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.12" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.1" />
+    <PackageReference Include="Avalonia" Version="12.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
     <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="MessagePack.Annotations" Version="3.1.4" />
