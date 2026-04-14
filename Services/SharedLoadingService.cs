@@ -44,7 +44,7 @@ public class SharedLoadingService(IServiceProvider serviceProvider)
     protected ClockViewModel LoadClock(Clock model)
     {
         var vm = New<ClockViewModel>();
-        vm.Overtime = model.Overtime;
+        vm.CurrentRound = model.CurrentRound;
         vm.TimeRemaining = model.Timer;
         return vm;
     }

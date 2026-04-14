@@ -1,11 +1,31 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Lightspeed.Network;
 using Lightspeed.Network.Messages;
 using Lightspeed.Services;
 
 namespace Lightspeed.ViewModels;
+
+#region Messages
+
+public sealed class AddMajorViolationMessage(PlayerViewModel player)
+{
+    public PlayerViewModel Player => player;
+}
+
+public sealed class EjectPlayerMessage(PlayerViewModel player)
+{
+    public PlayerViewModel Player => player;
+}
+
+public sealed class PlayerHonorChangedMessage(PlayerViewModel player)
+{
+    public PlayerViewModel Player => player;
+}
+
+#endregion
 
 /// <summary>
 /// A player
@@ -74,6 +94,45 @@ public sealed partial class PlayerViewModel : ParticipantViewModel
     /// Determines if the Player is disqualified either by card or ejection
     /// </summary>
     public override bool IsDisqualified => Card == Card.Black || IsEjected;
+
+    #endregion
+
+    #region Commands
+
+    [RelayCommand]
+    private void GiveCard()
+    {
+        // send a message to the client to give a card to this player.
+        // this allows the client to handle how cards are given, which may involve showing a confirmation dialog or allowing the user to specify the reason for the violation.
+        if (Card != Card.Black)
+            Send(new AddMajorViolationMessage(this));
+    }
+
+    [RelayCommand]
+    private void Eject()
+    {    
+        // send a message to the client to eject this player
+        // this allows the client to handle how ejection is done, which may involve showing a confirmation dialog or allowing the user to specify the reason for the violation.
+        if (!IsEjected)
+            Send(new EjectPlayerMessage(this));
+    }
+
+    [RelayCommand]
+    private void AddHonor()
+    {
+        Honor++;
+        Send(new PlayerHonorChangedMessage(this));
+    }
+
+    [RelayCommand]
+    private void RemoveHonor()
+    {
+        if (Honor > 0)
+        {
+            Honor--;
+           Send(new PlayerHonorChangedMessage(this));
+        }
+    }
 
     #endregion
 

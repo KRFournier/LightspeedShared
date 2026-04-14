@@ -7,5 +7,5 @@
 public sealed class Clock
 {
     public TimeSpan Timer { get; set; } = TimeSpan.FromSeconds(90);
-    public int Overtime { get; set; } = 0;
+    public int CurrentRound { get; set; } = 0;
 }

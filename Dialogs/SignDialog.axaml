@@ -25,7 +25,7 @@
 
 				<TextBox x:Name="SignTextBox"
 			             Classes="sabersport"
-						 Watermark="Enter your full name"
+						 PlaceholderText="Enter your full name"
 						 Width="400"/>
 
 			</StackPanel>

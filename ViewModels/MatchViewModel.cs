@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Lightspeed.Network;
@@ -30,6 +31,12 @@ public abstract partial class MatchViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(HasBye))]
     [NotifyPropertyChangedFor(nameof(HasFirst))]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
+    [NotifyPropertyChangedFor(nameof(Left))]
+    [NotifyPropertyChangedFor(nameof(Right))]
+    [NotifyPropertyChangedFor(nameof(IsFirstWinner))]
+    [NotifyPropertyChangedFor(nameof(IsSecondWinner))]
+    [NotifyPropertyChangedFor(nameof(IsLeftWinner))]
+    [NotifyPropertyChangedFor(nameof(IsRightWinner))]
     public partial ScoreViewModel First { get; set; }
     partial void OnFirstChanged(ScoreViewModel oldValue, ScoreViewModel newValue)
     {
@@ -42,6 +49,12 @@ public abstract partial class MatchViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(HasBye))]
     [NotifyPropertyChangedFor(nameof(HasSecond))]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
+    [NotifyPropertyChangedFor(nameof(Left))]
+    [NotifyPropertyChangedFor(nameof(Right))]
+    [NotifyPropertyChangedFor(nameof(IsFirstWinner))]
+    [NotifyPropertyChangedFor(nameof(IsSecondWinner))]
+    [NotifyPropertyChangedFor(nameof(IsLeftWinner))]
+    [NotifyPropertyChangedFor(nameof(IsRightWinner))]
     public partial ScoreViewModel Second { get; set; }
     partial void OnSecondChanged(ScoreViewModel oldValue, ScoreViewModel newValue)
     {
@@ -119,18 +132,6 @@ public abstract partial class MatchViewModel : ViewModelBase
 
     #region Winner
 
-    ///// <summary>
-    ///// The match slot to which the winner of this match advances, if applicable
-    ///// </summary>
-    //[ObservableProperty]
-    //public partial ScoreViewModel? WinnerAdvancement { get; set; }
-
-    ///// <summary>
-    ///// The match slot to which the loser of this match advances, if applicable
-    ///// </summary>
-    //[ObservableProperty]
-    //public partial ScoreViewModel? LoserAdvancement { get; set; }
-
     /// <summary>
     /// The winner of the match, if there is one
     /// </summary>
@@ -142,22 +143,10 @@ public abstract partial class MatchViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsFirstWinner))]
     [NotifyPropertyChangedFor(nameof(IsSecondWinner))]
     [NotifyPropertyChangedFor(nameof(WinningSide))]
+    [NotifyPropertyChangedFor(nameof(IsLeftWinner))]
+    [NotifyPropertyChangedFor(nameof(IsRightWinner))]
     public partial ScoreViewModel? Winner { get; set; } = null;
-    partial void OnWinnerChanged(ScoreViewModel? value)
-    {
-        Send(new MatchWinnerChangedMessage(this));
-        //if (WinnerAdvancement is not null)
-        //{
-        //    WinnerAdvancement.Participant = Winner?.Participant ?? New<EmptyParticipantViewModel>();
-        //    WinnerAdvancement.Seed = Winner?.Seed;
-        //}
-
-        //if (LoserAdvancement is not null)
-        //{
-        //    LoserAdvancement.Participant = Loser?.Participant ?? New<EmptyParticipantViewModel>();
-        //    LoserAdvancement.Seed = Loser?.Seed;
-        //}
-    }
+    partial void OnWinnerChanged(ScoreViewModel? value) => Send(new MatchWinnerChangedMessage(this));
 
     /// <summary>
     /// The winner referenced by position in the match
@@ -241,6 +230,28 @@ public abstract partial class MatchViewModel : ViewModelBase
 
         Winner = null;
     }
+
+    #endregion
+
+    #region Player Position
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Left))]
+    [NotifyPropertyChangedFor(nameof(Right))]
+    [NotifyPropertyChangedFor(nameof(IsLeftWinner))]
+    [NotifyPropertyChangedFor(nameof(IsRightWinner))]
+    public partial bool IsFirstLeft { get; set; } = true;
+
+    public ScoreViewModel Left => IsFirstLeft ? First : Second;
+
+    public ScoreViewModel Right => IsFirstLeft ? Second : First;
+
+    public bool IsLeftWinner => IsFirstLeft ? IsFirstWinner : IsSecondWinner;
+
+    public bool IsRightWinner => IsFirstLeft ? IsSecondWinner : IsFirstWinner;
+
+    [RelayCommand]
+    private void SwapSides() => IsFirstLeft = !IsFirstLeft;
 
     #endregion
 

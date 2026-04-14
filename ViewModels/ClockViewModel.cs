@@ -31,18 +31,64 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
     /// The initial time
     /// </summary>
     [ObservableProperty]
-    public partial TimeSpan TimeStart { get; set; } = TimeSpan.FromMinutes(2);
+    public partial TimeSpan TimeStart { get; set; } = TimeSpan.FromSeconds(90);
 
+    /// <summary>
+    /// The current time remaining. If this reaches zero, the match is over.
+    /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTimeUp))]
-    //[NotifyPropertyChangedFor(nameof(IsLeftWinner))]
-    //[NotifyPropertyChangedFor(nameof(IsRightWinner))]
-    //[NotifyPropertyChangedFor(nameof(IsMatchCompleted))]
     public partial TimeSpan TimeRemaining { get; set; } = TimeSpan.FromSeconds(90);
 
+    /// <summary>
+    /// The current round
+    /// </summary>
     [ObservableProperty]
-    public partial int Overtime { get; set; } = 0;
+    [NotifyPropertyChangedFor(nameof(HasMultipleRounds))]
+    [NotifyPropertyChangedFor(nameof(IsOvertime))]
+    [NotifyPropertyChangedFor(nameof(Status))]
+    public partial int CurrentRound { get; set; } = 1;
 
+    /// <summary>
+    /// The total number of rounds
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasMultipleRounds))]
+    [NotifyPropertyChangedFor(nameof(IsOvertime))]
+    [NotifyPropertyChangedFor(nameof(Status))]
+    public partial int TotalRounds { get; set; } = 1;
+
+    /// <summary>
+    /// Determines if the match has multiple rounds.
+    /// </summary>
+    public bool HasMultipleRounds => TotalRounds > 1;
+
+    /// <summary>
+    /// Determines if we're in overtime
+    /// </summary>
+    public bool IsOvertime => CurrentRound > TotalRounds;
+
+    /// <summary>
+    /// The status of the clock, which can be "Round X of Y", "Overtime", "Priority Overtime", or "Match Over".
+    /// </summary>
+    public string? Status
+    {
+        get
+        {
+            if (CurrentRound == TotalRounds + 1)
+                return "Overtime";
+            else if (CurrentRound == TotalRounds + 2)
+                return "Priority Overtime";
+            else if (TotalRounds > 1 && CurrentRound <= TotalRounds)
+                return $"Round {CurrentRound} of {TotalRounds}";
+            else
+                return null;
+        }
+    }
+
+    /// <summary>
+    /// Determines if the time is up
+    /// </summary>
     public bool IsTimeUp => TimeRemaining <= TimeSpan.Zero;
 
     /// <summary>
@@ -144,18 +190,18 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
 
     #endregion
 
-    public override string ToString() => $"{TimeRemaining:mm\\:ss}" + (Overtime > 0 ? $" +{Overtime}OT" : string.Empty);
+    public override string ToString() => $"{TimeRemaining:mm\\:ss}, Round {CurrentRound}";
 
     public Clock ToModel() => new()
     {
-        Overtime = Overtime,
+        CurrentRound = CurrentRound,
         Timer = TimeRemaining
     };
 
     public ClockState ToState() => new()
     {
         TimeRemaining = TimeRemaining,
-        OvertimeCount = Overtime
+        CurrentRound = CurrentRound
     };
 
     public void UpdateState(ClockState? state)
@@ -164,6 +210,6 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
             return;
 
         TimeRemaining = state.TimeRemaining;
-        Overtime = state.OvertimeCount;
+        CurrentRound = state.CurrentRound;
     }
 }

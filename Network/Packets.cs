@@ -433,7 +433,7 @@ public sealed class ClockState
     public bool IsRunning { get; set; }
 
     [Key(2)]
-    public int OvertimeCount { get; set; }
+    public int CurrentRound { get; set; }
 }
 
 /// <summary>

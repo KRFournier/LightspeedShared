@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Lightspeed.Network;
 using Lightspeed.Network.Messages;
+using Lightspeed.Services;
 using System.Collections.ObjectModel;
 
 namespace Lightspeed.ViewModels;
@@ -10,33 +11,67 @@ namespace Lightspeed.ViewModels;
 /// <summary>
 /// A match
 /// </summary>
-public partial class StandardMatchViewModel : MatchViewModel
+public partial class StandardMatchViewModel : MatchViewModel,
+    IRecipient<ClockStateMessage>, IRecipient<NewActionMessage>, IRecipient<UndoActionMessage>,
+    IRecipient<ActionModifiedMessage>, IRecipient<PriorityChangedMessage>
 {
     #region Properties
 
+    /// <summary>
+    /// The timer and rounds
+    /// </summary>
     [ObservableProperty]
     public partial ClockViewModel Clock { get; set; }
 
-    public ObservableCollection<Lightspeed.Action> Actions { get; set; } = [];
-
+    /// <summary>
+    /// Priority managament
+    /// </summary>
     [ObservableProperty]
     public partial PriorityViewModel Priority { get; set; }
 
+    /// <summary>
+    /// Actions
+    /// </summary>
+    public ObservableCollection<Lightspeed.Action> Actions { get; set; } = [];
+
     #endregion
 
-    public StandardMatchViewModel(IServiceProvider serviceProvider, IMessenger messenger) : base(serviceProvider, messenger)
+    #region Message Handlers
+
+    public void Receive(ClockStateMessage message)
     {
-        Clock = New<ClockViewModel>();
+        Clock.UpdateState(message.State);
+    }
+
+    public void Receive(NewActionMessage message)
+    {
+        SetNewAction(message.State);
+    }
+
+    public void Receive(UndoActionMessage message)
+    {
+        UndoAction(message.State);
+    }
+
+    public void Receive(ActionModifiedMessage message)
+    {
+        ModifyAction(message.State);
+    }
+
+    public void Receive(PriorityChangedMessage message)
+    {
+        Priority.UpdateState(message.State.Priority);
+    }
+
+    #endregion
+
+    public StandardMatchViewModel(IServiceProvider serviceProvider, IMessenger messenger, MatchFactory matchFactory) : base(serviceProvider, messenger)
+    {
+        Clock = matchFactory.NewClock(Settings);
         Priority = New<PriorityViewModel>();
 
         if (!Design.IsDesignMode)
-        {
-            messenger.Register<ClockStateMessage, Guid>(this, Guid, (_, m) => Clock.UpdateState(m.State));
-            messenger.Register<NewActionMessage, Guid>(this, Guid, (_, m) => SetNewAction(m.State));
-            messenger.Register<UndoActionMessage, Guid>(this, Guid, (_, m) => UndoAction(m.State));
-            messenger.Register<ActionModifiedMessage, Guid>(this, Guid, (_, m) => ModifyAction(m.State));
-            messenger.Register<PriorityChangedMessage, Guid>(this, Guid, (_, m) => Priority.UpdateState(m.State.Priority));
-        }
+            messenger.RegisterAll(this, Guid);
     }
 
     public override StandardMatch ToModel() => new()

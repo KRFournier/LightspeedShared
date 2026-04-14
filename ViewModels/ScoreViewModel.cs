@@ -1,10 +1,21 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using Lightspeed.Network;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel;
 
 namespace Lightspeed.ViewModels;
+
+#region Messages
+
+public class AddMinorViolationMessage(ScoreViewModel score)
+{
+    public ScoreViewModel Score => score;
+}
+
+#endregion
 
 /// <summary>
 /// A participant(s)' score in a match
@@ -58,6 +69,18 @@ public partial class ScoreViewModel(IServiceProvider serviceProvider, IMessenger
     /// Which outcome to use from the parent match. Ignored if ParentMatch is null.
     /// </summary>
     public MatchOutcome ParentMatchRef { get; set; } = MatchOutcome.Winner;
+
+    #endregion
+
+    #region Commands
+
+    [RelayCommand]
+    private void GiveMinorViolation()
+    {
+        // send a message to the client to add a minor violation to this score.
+        // this allows the client to handle how minor violations are added, which may involve showing a confirmation dialog or allowing the user to specify the reason for the violation.
+        Send(new AddMinorViolationMessage(this));
+    }
 
     #endregion
 

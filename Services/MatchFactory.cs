@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Lightspeed.Services;
 
 /// <summary>
-/// This factory is used to create view models from models or other data.
+/// This factory is used to create view models for matches and match related view models, such as score view models.
 /// </summary>
 public class MatchFactory(IServiceProvider serviceProvider)
 {
@@ -49,11 +49,22 @@ public class MatchFactory(IServiceProvider serviceProvider)
     /// </summary>
     /// <param name="participant"></param>
     /// <returns></returns>
-    protected ScoreViewModel NewScore(ParticipantViewModel participant, int? seed = null)
+    public ScoreViewModel NewScore(ParticipantViewModel participant, int? seed = null)
     {
         var vm = serviceProvider.GetRequiredService<ScoreViewModel>();
         vm.Participant = participant;
         vm.Seed = seed;
+        return vm;
+    }
+
+    /// <summary>
+    /// Creates a new clock view model with the specified settings.
+    /// </summary>
+    public ClockViewModel NewClock(MatchSettingsViewModel settings)
+    {
+        var vm = serviceProvider.GetRequiredService<ClockViewModel>();
+        vm.TimeStart = settings.TimeLimit;
+        vm.TotalRounds = settings.Rounds;
         return vm;
     }
 }
