@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Lightspeed.Network;
 using System.ComponentModel;
 
@@ -6,7 +8,25 @@ namespace Lightspeed.ViewModels;
 
 #region Messages
 
-public sealed record ParticipantDisqualifedChanged(ParticipantViewModel Participant);
+public sealed class AddMajorViolationMessage(ParticipantViewModel participant)
+{
+    public ParticipantViewModel Participant => participant;
+}
+
+public sealed class EjectParticipantMessage(ParticipantViewModel participant)
+{
+    public ParticipantViewModel Participant => participant;
+}
+
+public sealed class ParticipantHonorChangedMessage(ParticipantViewModel participant)
+{
+    public ParticipantViewModel Participant => participant;
+}
+
+public sealed class ParticipantDisqualifedChanged(ParticipantViewModel participant)
+{
+    public ParticipantViewModel Participant => participant;
+}
 
 #endregion
 
@@ -17,12 +37,66 @@ public abstract partial class ParticipantViewModel(IServiceProvider serviceProvi
     public abstract string Name { get; }
     public virtual string? Subtitle => null;
     public abstract int PowerLevel { get; }
-    public abstract bool IsDisqualified { get; }
     public abstract bool IsBye { get; }
     public abstract bool IsEmpty { get; }
     public virtual PlayerViewModel? CurrentPlayer => null;
 
     public Guid Guid { get; set; } = Guid.NewGuid();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDisqualified))]
+    public partial Card Card { get; set; } = Card.None;
+
+    [ObservableProperty]
+    public partial int Honor { get; set; } = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDisqualified))]
+    public partial bool IsEjected { get; set; } = false;
+
+    /// <summary>
+    /// Determines if the Player is disqualified either by card or ejection
+    /// </summary>
+    public bool IsDisqualified => Card == Card.Black || IsEjected;
+
+    #endregion
+
+    #region Commands
+
+    [RelayCommand]
+    public void GiveCard()
+    {
+        // send a message to the client to give a card to this player.
+        // this allows the client to handle how cards are given, which may involve showing a confirmation dialog or allowing the user to specify the reason for the violation.
+        if (Card != Card.Black)
+            Send(new AddMajorViolationMessage(this));
+    }
+
+    [RelayCommand]
+    public void Eject()
+    {
+        // send a message to the client to eject this player
+        // this allows the client to handle how ejection is done, which may involve showing a confirmation dialog or allowing the user to specify the reason for the violation.
+        if (!IsEjected)
+            Send(new EjectParticipantMessage(this));
+    }
+
+    [RelayCommand]
+    public void AddHonor()
+    {
+        Honor++;
+        Send(new ParticipantHonorChangedMessage(this));
+    }
+
+    [RelayCommand]
+    public void RemoveHonor()
+    {
+        if (Honor > 0)
+        {
+            Honor--;
+            Send(new ParticipantHonorChangedMessage(this));
+        }
+    }
 
     #endregion
 
@@ -57,7 +131,6 @@ public sealed partial class ByeViewModel : ParticipantViewModel
     public override ByeParticipant ToModel() => new();
     public override bool IsBye => true;
     public override bool IsEmpty => false;
-    public override bool IsDisqualified => true;
     public override string ToString() => "BYE";
 }
 
@@ -76,6 +149,5 @@ public sealed partial class EmptyParticipantViewModel : ParticipantViewModel
     public override EmptyParticipant ToModel() => new();
     public override bool IsBye => false;
     public override bool IsEmpty => true;
-    public override bool IsDisqualified => false;
     public override string ToString() => "EMPTY";
 }

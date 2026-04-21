@@ -108,42 +108,50 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
     #region Commands
 
     /// <summary>
-    /// Adds time to the clock
+    /// Adds one second
     /// </summary>
     [RelayCommand]
-    private void AddTime()
+    public void AddSecond()
     {
-        if (IsStarted)
-        {
-            TimeRemaining += One;
-        }
-        else
-        {
-            TimeStart += Fifteen;
-            TimeRemaining = TimeStart;
-        }
+        TimeRemaining += One;
         Send(new ClockUpdatedMessage(ToState()));
     }
 
+    /// <summary>
+    /// Subtracts one second
+    /// </summary>
     [RelayCommand]
-    private void SubtractTime()
+    public void SubtractSecond()
     {
-        if (IsStarted)
-        {
-            if (TimeRemaining > One)
-                TimeRemaining -= One;
-            else
-                TimeRemaining = TimeSpan.Zero;
-            Send(new ClockUpdatedMessage(ToState()));
-        }
+        if (TimeRemaining > One)
+            TimeRemaining -= One;
         else
+            TimeRemaining = TimeSpan.Zero;
+        Send(new ClockUpdatedMessage(ToState()));
+    }
+
+    /// <summary>
+    /// Adds 15 seconds
+    /// </summary>
+    [RelayCommand]
+    public void AddQuarter()
+    {
+        TimeStart += Fifteen;
+        TimeRemaining = TimeStart;
+        Send(new ClockUpdatedMessage(ToState()));
+    }
+
+    /// <summary>
+    /// Subtracts 15 seconds
+    /// </summary>
+    [RelayCommand]
+    public void SubtractQuarter()
+    {
+        if (TimeStart > Fifteen)
         {
-            if (TimeStart > Fifteen)
-            {
-                TimeStart -= Fifteen;
-                TimeRemaining = TimeStart;
-                Send(new ClockUpdatedMessage(ToState()));
-            }
+            TimeStart -= Fifteen;
+            TimeRemaining = TimeStart;
+            Send(new ClockUpdatedMessage(ToState()));
         }
     }
 
@@ -151,7 +159,7 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
     /// Starts the timer
     /// </summary>
     [RelayCommand]
-    private void Fence()
+    public void Start()
     {
         if (!IsTimeUp)
         {
@@ -166,7 +174,7 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
     /// Stops the timer
     /// </summary>
     [RelayCommand]
-    private void Break()
+    public void Break()
     {
         timer.Stop();
         vibrateService?.Stop();

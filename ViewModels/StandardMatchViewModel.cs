@@ -13,7 +13,7 @@ namespace Lightspeed.ViewModels;
 /// </summary>
 public partial class StandardMatchViewModel : MatchViewModel,
     IRecipient<ClockStateMessage>, IRecipient<NewActionMessage>, IRecipient<UndoActionMessage>,
-    IRecipient<ActionModifiedMessage>, IRecipient<PriorityChangedMessage>
+    IRecipient<ActionModifiedMessage>
 {
     #region Properties
 
@@ -24,15 +24,9 @@ public partial class StandardMatchViewModel : MatchViewModel,
     public partial ClockViewModel Clock { get; set; }
 
     /// <summary>
-    /// Priority managament
-    /// </summary>
-    [ObservableProperty]
-    public partial PriorityViewModel Priority { get; set; }
-
-    /// <summary>
     /// Actions
     /// </summary>
-    public ObservableCollection<Lightspeed.Action> Actions { get; set; } = [];
+    public ObservableCollection<ActionViewModel> Actions { get; set; } = [];
 
     #endregion
 
@@ -58,34 +52,26 @@ public partial class StandardMatchViewModel : MatchViewModel,
         ModifyAction(message.State);
     }
 
-    public void Receive(PriorityChangedMessage message)
-    {
-        Priority.UpdateState(message.State.Priority);
-    }
-
     #endregion
 
     public StandardMatchViewModel(IServiceProvider serviceProvider, IMessenger messenger, MatchFactory matchFactory) : base(serviceProvider, messenger)
     {
         Clock = matchFactory.NewClock(Settings);
-        Priority = New<PriorityViewModel>();
 
         if (!Design.IsDesignMode)
             messenger.RegisterAll(this, Guid);
     }
 
-    public override StandardMatch ToModel() => new()
+    public override StandardMatch ToModel()
     {
-        Id = Guid,
-        Number = Number,
-        Clock = Clock.ToModel(),
-        First = First.ToModel(),
-        Second = Second.ToModel(),
-        IsMatchStarted = IsMatchStarted,
-        Actions = [.. Actions],
-        Priority = Priority.ToModel(),
-        Winner = WinningSide
-    };
+        var model = new StandardMatch()
+        {
+            Clock = Clock.ToModel(),
+            Actions = [.. Actions.Select(a => a.ToModel(this))]
+        };
+        UpdateMatchModel(model);
+        return model;
+    }
 
     public override StandardMatchState ToState() => new()
     {
@@ -94,67 +80,15 @@ public partial class StandardMatchViewModel : MatchViewModel,
         Second = Second.ToState(),
         Settings = Settings.ToState(),
         Clock = Clock.ToState(),
-        Actions = [.. Actions.Select(a => a.ToState())],
-        Priority = Priority.ToState()
+        Actions = [.. Actions.Select(a => a.ToState(this))],
+        Priority = new()
+        {
+            PrioritySide = PrioritySide,
+            PriorityPoints = PriorityPoints,
+            InPriority = InPriority
+        }
     };
 
-
-    public override MatchSummary ToSummary() => new()
-    {
-        Id = Guid,
-        Number = Number ?? 0,
-        First = First.ToState(),
-        Second = Second.ToState(),
-        Winner = WinningSide,
-        IsStarted = IsMatchStarted,
-        IsCompleted = IsMatchCompleted,
-        Clock = Clock.ToState()
-    };
-
-    #region Actions
-
-    /// <summary>
-    /// Adds the action and updates the player states
-    /// </summary>
-    public void SetNewAction(NewActionState state)
-    {
-        Clock.UpdateState(state.Clock);
-        First.UpdateState(state.First);
-        Second.UpdateState(state.Second);
-
-        if (state.Action is not null)
-            Actions.Insert(0, state.Action.ToModel());
-    }
-
-    /// <summary>
-    /// Adds the action and updates the player states
-    /// </summary>
-    public void ModifyAction(ActionModified state)
-    {
-        First.Points = state.Points;
-        Second.Points = state.Points;
-
-        var action = Actions.FirstOrDefault(a => a.Id == state.ActionId);
-        action?.Points = state.Points;
-    }
-
-    /// <summary>
-    /// Updates the players states and removes the last action
-    /// </summary>
-    public void UndoAction(UndoActionState state)
-    {
-        Clock.UpdateState(state.Clock);
-        First.UpdateState(state.First);
-        Second.UpdateState(state.Second);
-
-        var action = Actions.FirstOrDefault(a => a.Id == state.ActionId);
-        if (action is not null)
-            Actions.Remove(action);
-    }
-
-    public IEnumerable<Lightspeed.Action> FirstActions => Actions.Where(a => a.Actor == Side.First);
-    public IEnumerable<Lightspeed.Action> SecondActions => Actions.Where(a => a.Actor == Side.Second);
-
-    #endregion
+    protected override ClockState? GetClockState() => Clock.ToState();
 
 }

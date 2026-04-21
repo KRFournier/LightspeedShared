@@ -84,7 +84,7 @@ public sealed class MatchGroupsState
 /// Match summary
 /// </summary>
 [MessagePackObject]
-public sealed class MatchSummary
+public class MatchSummary
 {
     [Key(0)]
     public Guid Id { get; set; }
@@ -122,6 +122,9 @@ public sealed class MatchSummaries
 {
     [Key(0)]
     public MatchSummary[] Summaries { get; set; } = [];
+
+    [Key(1)]
+    public bool ShowWeapons { get; set; } = false;
 }
 
 /// <summary>
@@ -243,7 +246,10 @@ public abstract class MatchState
     public ScoreState? Second { get; set; }
 
     [Key(3)]
-    public string? Next { get; set; }
+    public MatchSettingsState? Settings { get; set; }
+
+    [Key(4)]
+    public PriorityState? Priority { get; set; }
 }
 
 /// <summary>
@@ -252,17 +258,11 @@ public abstract class MatchState
 [MessagePackObject]
 public sealed class StandardMatchState : MatchState
 {
-    [Key(4)]
-    public MatchSettingsState? Settings { get; set; }
-
     [Key(5)]
     public ClockState? Clock { get; set; }
 
     [Key(6)]
     public ActionState[] Actions { get; set; } = [];
-
-    [Key(7)]
-    public PriorityState? Priority { get; set; }
 }
 
 /// <summary>
@@ -443,7 +443,7 @@ public sealed class ClockState
 public sealed class PriorityState
 {
     [Key(0)]
-    public Side PreviousPriority { get; set; }
+    public Side PrioritySide { get; set; }
 
     [Key(1)]
     public int PriorityPoints { get; set; }

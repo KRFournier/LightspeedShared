@@ -67,4 +67,15 @@ public class MatchFactory(IServiceProvider serviceProvider)
         vm.TotalRounds = settings.Rounds;
         return vm;
     }
+
+    /// <summary>
+    /// Creates a new clock view model with the specified settings.
+    /// </summary>
+    public ClockViewModel NewClock(TimeSpan timeLimit)
+    {
+        var vm = serviceProvider.GetRequiredService<ClockViewModel>();
+        vm.TimeStart = timeLimit;
+        vm.TotalRounds = 1;
+        return vm;
+    }
 }

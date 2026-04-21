@@ -39,6 +39,21 @@ public class SharedLoadingService(IServiceProvider serviceProvider)
     public T New<T>() where T : class => serviceProvider.GetRequiredService<T>();
 
     /// <summary>
+    /// Loads a new action view model from an <see cref="Action"/> model.
+    /// </summary>
+    protected ActionViewModel LoadAction(MatchViewModel match, Action model)
+    {
+        var vm = New<ActionViewModel>();
+        vm.Guid = model.Id;
+        vm.Actor = model.Actor == Side.First ? match.First : (model.Actor == Side.Second ? match.Second : null);
+        vm.Scorer = model.Scorer == Side.First ? match.First : (model.Scorer == Side.Second ? match.Second : null);
+        vm.Points = model.Points;
+        vm.Type = model.Type;
+        vm.SubType = model.SubType;
+        return vm;
+    }
+
+    /// <summary>
     /// Loads a clock view model from a <see cref="Clock"/> model.
     /// </summary>
     protected ClockViewModel LoadClock(Clock model)
@@ -109,18 +124,6 @@ public class SharedLoadingService(IServiceProvider serviceProvider)
     }
 
     /// <summary>
-    /// Loads a new priority view model from a <see cref="Priority" model./>
-    /// </summary>
-    protected PriorityViewModel LoadPriority(Priority model)
-    {
-        var vm = New<PriorityViewModel>();
-        vm.PreviousPriority = model.PreviousPriority;
-        vm.PriorityPoints = model.PriorityPoints;
-        vm.InPriority = model.InPriority;
-        return vm;
-    }
-
-    /// <summary>
     /// Loads a new score view model from a <see cref="Score"/>.
     /// If the score has a parent match, it will bind to the winner or loser of that match.
     /// </summary>
@@ -145,9 +148,12 @@ public class SharedLoadingService(IServiceProvider serviceProvider)
         vm.First = LoadScore(model.First);
         vm.Second = LoadScore(model.Second);
         vm.IsMatchStarted = model.IsMatchStarted;
-        vm.Actions = [.. model.Actions];
-        vm.Priority = LoadPriority(model.Priority);
+        vm.PrioritySide = model.Priority.PrioritySide;
+        vm.PriorityPoints = model.Priority.PriorityPoints;
+        vm.InPriority = model.Priority.InPriority;
         vm.WinningSide = model.Winner;
+
+        vm.Actions = [.. model.Actions.Select(a => LoadAction(vm, a))];
 
         _matches.Add(vm.Guid, vm);
 

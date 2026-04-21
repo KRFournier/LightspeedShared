@@ -21,7 +21,6 @@ public static class SharedDependencies
         serviceCollection.AddTransient<ClockViewModel>();
         serviceCollection.AddTransient<MatchSettingsViewModel>();
         serviceCollection.AddTransient<PlayerViewModel>();
-        serviceCollection.AddTransient<PriorityViewModel>();
         serviceCollection.AddTransient<ScoreViewModel>();
         serviceCollection.AddTransient<StandardMatchViewModel>();
     }

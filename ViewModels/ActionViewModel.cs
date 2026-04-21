@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Input;
+using Lightspeed.Network;
 
 namespace Lightspeed.ViewModels;
 
@@ -7,22 +8,24 @@ namespace Lightspeed.ViewModels;
 /// Base class for all action view models. Each action is a view model so we can customize it's
 /// appearance with a matching view.
 /// </summary>
-public partial class ActionViewModel(IServiceProvider serviceProvider, IMessenger messenger) : ViewModelBase(serviceProvider, messenger)
+public partial class ActionViewModel : ObservableObject
 {
     #region Properties
 
-    public readonly Guid Guid = Guid.NewGuid();
+    [ObservableProperty]
+    public partial Guid Guid { get; set; } = Guid.NewGuid();
 
-    public readonly ActionType Type;
+    [ObservableProperty]
+    public partial ActionType Type { get; set; } = ActionType.Unknown;
 
     [ObservableProperty]
     public partial string? SubType { get; set; }
 
     [ObservableProperty]
-    private partial Side Actor { get; set; } = Side.Neither;
+    public partial ScoreViewModel? Actor { get; set; }
 
     [ObservableProperty]
-    private partial Side Scorer { get; set; } = Side.Neither;
+    public partial ScoreViewModel? Scorer { get; set; }
 
     [ObservableProperty]
     public partial int Points { get; set; } = 0;
@@ -48,100 +51,79 @@ public partial class ActionViewModel(IServiceProvider serviceProvider, IMessenge
 
     #endregion
 
-    //#region Commands
+    #region Commands
 
-    //[RelayCommand]
-    //private void AddPoint()
-    //{
-    //    if (Scorer is not null)
-    //    {
-    //        Points++;
-    //        Scorer.Score++;
-    //        Modified?.Invoke();
-    //    }
-    //}
+    [RelayCommand]
+    private void AddPoint()
+    {
+        if (Scorer is not null)
+        {
+            Points++;
+            Scorer.Points++;
+        }
+    }
 
-    //[RelayCommand]
-    //private void RemovePoint()
-    //{
-    //    if (Points > 0 && Scorer is not null)
-    //    {
-    //        Points--;
-    //        Scorer.Score--;
-    //        Modified?.Invoke();
-    //    }
-    //}
+    [RelayCommand]
+    private void RemovePoint()
+    {
+        if (Points > 0 && Scorer is not null)
+        {
+            Points--;
+            Scorer.Points--;
+        }
+    }
 
-    //public void Apply()
-    //{
-    //    if (Scorer is not null)
-    //        Scorer.Score += Points;
+    public void Apply()
+    {
+        Scorer?.Points += Points;
 
-    //    if (Actor is not null)
-    //    {
-    //        switch (Type)
-    //        {
-    //            case ActionType.Card: Actor.Card++; break;
-    //            case ActionType.Conceded: Actor.Honor++; break;
-    //            case ActionType.Ejected: Actor.Ejected = true; break;
-    //            case ActionType.Penalty:
-    //                if (IsForce)
-    //                {
-    //                    Actor.ForceCalls++;
-    //                    Actor.MatchForceCalls++;
-    //                }
-    //                Actor.MinorViolationCount++;
-    //                break;
-    //        }
-    //    }
-    //}
+        if (Actor is not null && Actor.Participant.CurrentPlayer is not null)
+        {
+            switch (Type)
+            {
+                case ActionType.Card: Actor.Participant.CurrentPlayer.Card++; break;
+                case ActionType.Conceded: Actor.Participant.CurrentPlayer.Honor++; break;
+                case ActionType.Ejected: Actor.Participant.CurrentPlayer.IsEjected = true; break;
+                case ActionType.Penalty: Actor.MinorViolations++; break;
+            }
+        }
+    }
 
-    //public void Undo()
-    //{
-    //    if (Scorer is not null)
-    //        Scorer.Score -= Points;
+    public void Undo()
+    {
+        Scorer?.Points -= Points;
 
-    //    if (Actor is not null)
-    //    {
-    //        switch (Type)
-    //        {
-    //            case ActionType.Card: Actor.Card--; break;
-    //            case ActionType.Conceded: Actor.Honor--; break;
-    //            case ActionType.Ejected: Actor.Ejected = false; break;
-    //            case ActionType.Penalty:
-    //                if (IsForce)
-    //                {
-    //                    Actor.ForceCalls--;
-    //                    Actor.MatchForceCalls--;
-    //                }
-    //                Actor.MinorViolationCount--;
-    //                break;
-    //        }
-    //    }
-    //}
+        if (Actor is not null && Actor.Participant.CurrentPlayer is not null)
+        {
+            switch (Type)
+            {
+                case ActionType.Card: Actor.Participant.CurrentPlayer.Card--; break;
+                case ActionType.Conceded: Actor.Participant.CurrentPlayer.Honor--; break;
+                case ActionType.Ejected: Actor.Participant.CurrentPlayer.IsEjected = false; break;
+                case ActionType.Penalty: Actor.MinorViolations--; break;
+            }
+        }
+    }
 
-    //#endregion
+    #endregion
 
-    //public ActionViewModel(ActionType type, PlayerViewModel? actor = null, int points = 0, PlayerViewModel? scorer = null, string subType = "")
-    //{
-    //    Type = type;
-    //    Actor = actor;
-    //    Scorer = scorer ?? actor;
-    //    Points = points;
-    //    SubType = subType;
-    //}
+    public Lightspeed.Action ToModel(MatchViewModel match) => new()
+    {
+        Id = Guid,
+        Actor = Actor == match.First ? Side.First : (Actor == match.Second ? Side.Second : Side.Neither),
+        Scorer = Scorer == match.First ? Side.First : (Scorer == match.Second ? Side.Second : Side.Neither),
+        Points = Points,
+        Type = Type,
+        SubType = SubType
+    };
 
-    //public ActionViewModel(ActionState action, PlayerViewModel playerOne, PlayerViewModel playerTwo)
-    //{
-    //    Type = action.Type;
-    //    Actor = action.Actor != Guid.Empty ? (action.Actor == playerOne.Guid ? playerOne : playerTwo) : null;
-    //    Scorer = (action.Scorer != Guid.Empty ? (action.Scorer == playerOne.Guid ? playerOne : playerTwo) : null) ?? Actor;
-    //    Points = action.Points;
-    //    SubType = action.SubType;
-    //}
-
-    //public ActionState GetActionState(PlayerViewModel first, PlayerViewModel second)
-    //{
-    //    return new ActionState(Guid, Actor?.Guid ?? Guid.Empty, Scorer?.Guid ?? Guid.Empty, Points, Type, SubType);
-    //}
+    public ActionState ToState(MatchViewModel match) => new()
+    {
+        Id = Guid,
+        Actor = Actor == match.First ? Side.First : (Actor == match.Second ? Side.Second : Side.Neither),
+        Scorer = Scorer == match.First ? Side.First : (Scorer == match.Second ? Side.Second : Side.Neither),
+        Points = Points,
+        Type = Type,
+        SubType = SubType
+    };
 }
