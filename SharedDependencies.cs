@@ -16,12 +16,11 @@ public static class SharedDependencies
         serviceCollection.AddTransient<SharedLoadingService>();
 
         // view models
-        serviceCollection.AddSingleton<ByeViewModel>();
-        serviceCollection.AddSingleton<EmptyParticipantViewModel>();
-        serviceCollection.AddTransient<ClockViewModel>();
-        serviceCollection.AddTransient<MatchSettingsViewModel>();
-        serviceCollection.AddTransient<PlayerViewModel>();
-        serviceCollection.AddTransient<ScoreViewModel>();
+        serviceCollection.AddTransient<BracketMatchViewModel>();
+        serviceCollection.AddTransient<StandardMatchSettingsViewModel>();
         serviceCollection.AddTransient<StandardMatchViewModel>();
+
+        // note: we do not register match components. Those are instantiated by
+        // the matches as needed, and are not shared across matches.
     }
 }

@@ -99,7 +99,7 @@ public class MatchSummary
     public ScoreState? Second { get; set; }
 
     [Key(4)]
-    public Side Winner { get; set; }
+    public SideReference Winner { get; set; }
 
     [Key(5)]
     public string? Color { get; set; }
@@ -198,7 +198,7 @@ public sealed class ScoreChangedState
     public Guid MatchId { get; set; }
 
     [Key(1)]
-    public Side Side { get; set; }
+    public SideReference Side { get; set; }
 
     [Key(2)]
     public int Score { get; set; }
@@ -214,10 +214,10 @@ public sealed class ActionState
     public Guid Id { get; set; }
 
     [Key(1)]
-    public Side Actor { get; set; }
+    public SideReference Actor { get; set; }
 
     [Key(2)]
-    public Side Scorer { get; set; }
+    public SideReference Scorer { get; set; }
 
     [Key(3)]
     public int Points { get; set; }
@@ -398,10 +398,10 @@ public sealed class OrientationState
     public Guid RingId { get; set; }
 
     [Key(1)]
-    public Side Blue { get; set; }
+    public SideReference Blue { get; set; }
 
     [Key(2)]
-    public Side Red { get; set; }
+    public SideReference Red { get; set; }
 }
 
 /// <summary>
@@ -443,7 +443,7 @@ public sealed class ClockState
 public sealed class PriorityState
 {
     [Key(0)]
-    public Side PrioritySide { get; set; }
+    public SideReference PrioritySide { get; set; }
 
     [Key(1)]
     public int PriorityPoints { get; set; }

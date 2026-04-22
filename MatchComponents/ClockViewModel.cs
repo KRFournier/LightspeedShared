@@ -2,9 +2,11 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Lightspeed.Network;
+using Lightspeed.Network.Messages;
 using Lightspeed.Services;
+using Lightspeed.ViewModels;
 
-namespace Lightspeed.ViewModels;
+namespace Lightspeed.MatchComponents;
 
 #region Messages
 
@@ -19,11 +21,13 @@ public sealed class ClockUpdatedMessage(ClockState state)
 /// A clock is a set of one (or more) timers with support for overtime.
 /// The match ends if any timer reaches zero.
 /// </summary>
-public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger messenger, IVibrateService vibrateService) : ViewModelBase(serviceProvider, messenger)
+public partial class ClockViewModel : ViewModelBase, IRecipient<ClockStateMessage>
 {
+    private readonly IVibrateService? _vibrateService;
     private readonly System.Timers.Timer timer = new();
     private static readonly TimeSpan One = new(0, 0, 1);
     private static readonly TimeSpan Fifteen = new(0, 0, 15);
+    private static readonly TimeSpan OvertimeTime = new(0, 0, 30);
 
     #region Properties
 
@@ -31,14 +35,14 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
     /// The initial time
     /// </summary>
     [ObservableProperty]
-    public partial TimeSpan TimeStart { get; set; } = TimeSpan.FromSeconds(90);
+    public partial TimeSpan TimeStart { get; set; }
 
     /// <summary>
     /// The current time remaining. If this reaches zero, the match is over.
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTimeUp))]
-    public partial TimeSpan TimeRemaining { get; set; } = TimeSpan.FromSeconds(90);
+    public partial TimeSpan TimeRemaining { get; set; }
 
     /// <summary>
     /// The current round
@@ -66,19 +70,24 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
     /// <summary>
     /// Determines if we're in overtime
     /// </summary>
-    public bool IsOvertime => CurrentRound > TotalRounds;
+    public bool IsOvertime => CurrentRound == TotalRounds + 1;
 
     /// <summary>
-    /// The status of the clock, which can be "Round X of Y", "Overtime", "Priority Overtime", or "Match Over".
+    /// Determines if we're in priority overtime
+    /// </summary>
+    public bool IsPriorityOvertime => CurrentRound == TotalRounds + 2;
+
+    /// <summary>
+    /// The status of the clock, which can be "Round X of Y", "Overtime", or "Priority Overtime"
     /// </summary>
     public string? Status
     {
         get
         {
-            if (CurrentRound == TotalRounds + 1)
-                return "Overtime";
-            else if (CurrentRound == TotalRounds + 2)
+            if (IsPriorityOvertime)
                 return "Priority Overtime";
+            else if (IsOvertime)
+                return "Overtime";
             else if (TotalRounds > 1 && CurrentRound <= TotalRounds)
                 return $"Round {CurrentRound} of {TotalRounds}";
             else
@@ -177,14 +186,63 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
     public void Break()
     {
         timer.Stop();
-        vibrateService?.Stop();
+        _vibrateService?.Stop();
         IsRunning = false;
         Send(new ClockUpdatedMessage(ToState()));
     }
 
     /// <summary>
-    /// Handles the timer tick
+    /// Adds overtime to the clock (30 seconds)
     /// </summary>
+    [RelayCommand]
+    public void AddOvertime()
+    {
+        if (IsTimeUp && CurrentRound >= TotalRounds)
+        {
+            CurrentRound++;
+            TimeRemaining = OvertimeTime;
+            Send(new ClockUpdatedMessage(ToState()));
+        }
+    }
+
+    /// <summary>
+    /// Removes overtime, in case of error
+    /// </summary>
+    [RelayCommand]
+    public void RemoveOvertime()
+    {
+        if (CurrentRound > TotalRounds)
+        {
+            CurrentRound--;
+            TimeRemaining = TimeSpan.Zero;
+            Send(new ClockUpdatedMessage(ToState()));
+        }
+    }
+
+    #endregion
+
+    #region Message Handlers
+
+    public void Receive(ClockStateMessage message)
+    {
+        TimeRemaining = message.Clock.Timer;
+        CurrentRound = message.Clock.CurrentRound;
+    }
+
+    #endregion
+
+    public ClockViewModel(Guid matchGuid, TimeSpan timeStart, IServiceProvider serviceProvider, IMessenger messenger, IVibrateService? vibrateService = null) : base(serviceProvider, messenger)
+    {
+        _vibrateService = vibrateService;
+
+        TimeRemaining = TimeStart = timeStart;
+
+        timer.Interval = 1000;
+        timer.Elapsed += OnTimerTick;
+
+        messenger.Register(this, matchGuid);
+    }
+
     private void OnTimerTick(object? source, System.Timers.ElapsedEventArgs e)
     {
         TimeRemaining -= One;
@@ -192,11 +250,9 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
         {
             timer.Stop();
             Send(new ClockUpdatedMessage(ToState()));
-            vibrateService?.Start();
+            _vibrateService?.Start();
         }
     }
-
-    #endregion
 
     public override string ToString() => $"{TimeRemaining:mm\\:ss}, Round {CurrentRound}";
 
@@ -211,13 +267,4 @@ public partial class ClockViewModel(IServiceProvider serviceProvider, IMessenger
         TimeRemaining = TimeRemaining,
         CurrentRound = CurrentRound
     };
-
-    public void UpdateState(ClockState? state)
-    {
-        if (state is null)
-            return;
-
-        TimeRemaining = state.TimeRemaining;
-        CurrentRound = state.CurrentRound;
-    }
 }

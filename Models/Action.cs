@@ -6,8 +6,8 @@
 public sealed class Action
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public Side Actor { get; set; } = Side.Neither;
-    public Side Scorer { get; set; } = Side.Neither;
+    public SideReference Actor { get; set; } = SideReference.Neither;
+    public SideReference Scorer { get; set; } = SideReference.Neither;
     public int Points { get; set; } = 0;
     public ActionType Type { get; set; } = ActionType.Unknown;
     public string? SubType { get; set; }

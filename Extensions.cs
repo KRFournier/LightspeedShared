@@ -1,4 +1,5 @@
 ﻿using Lightspeed.Network;
+using Lightspeed.MatchComponents;
 
 namespace Lightspeed;
 
@@ -25,6 +26,43 @@ public static class Extensions
         Type = state.Type,
         SubType = state.SubType
     };
+
+    #endregion
+
+    #region Sides
+
+    /// <summary>
+    /// Gets the side reference (Left, Right, or Neither) for a given SideViewModel within a LeftRightViewModel.
+    /// </summary>
+    public static SideReference ToReference<T>(this LeftRightViewModel<T> sides, SideViewModel<T>? side) where T : ParticipantViewModel
+    {
+        if (side == sides.Left)
+            return SideReference.Left;
+        if (side == sides.Right)
+            return SideReference.Right;
+        return SideReference.Neither;
+    }
+
+    /// <summary>
+    /// Returns the other side of a reference. If the reference is Left, it returns Right; if it's Right, it returns Left; if it's Neither, it returns Neither.
+    /// </summary>
+    public static SideReference ToOtherSide(this SideReference reference) => reference switch
+    {
+        SideReference.Left => SideReference.Right,
+        SideReference.Right => SideReference.Left,
+        _ => SideReference.Neither
+    };
+
+    /// <summary>
+    /// Gets the side for a given reference
+    /// </summary>
+    public static SideViewModel<T>? ToSide<T>(this LeftRightViewModel<T> sides, SideReference reference) where T : ParticipantViewModel =>
+        reference switch
+        {
+            SideReference.Left => sides.Left,
+            SideReference.Right => sides.Right,
+            _ => throw new ArgumentOutOfRangeException(nameof(reference), "Invalid side reference")
+        };
 
     #endregion
 

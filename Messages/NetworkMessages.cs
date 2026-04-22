@@ -30,9 +30,35 @@ public abstract class StateMessage<T>(T state)
     public T State { get; set; } = state;
 }
 
-public sealed class ClockStateMessage(ClockState state) : StateMessage<ClockState>(state) { }
+#region Match Components
+
+public sealed class ClockStateMessage(Clock clock)
+{
+    public readonly Clock Clock = clock;
+}
+
+public sealed class CompetitorStateMessage(Competitor competitor)
+{
+    public readonly Competitor Competitor = competitor;
+} 
+
+public sealed class HonorStateMessage(int honor)
+{
+    public readonly int Honor = honor;
+}
+
+public sealed class PenaltiesStateMessage(Penalties penalties)
+{
+    public readonly Penalties Penalties = penalties;
+}
+
+public sealed class PriorityChangedMessage(Priority priority)
+{
+    public readonly Priority Priority = priority;
+}
+
+#endregion
+
 public sealed class NewActionMessage(NewActionState state) : StateMessage<NewActionState>(state) { }
 public sealed class ActionModifiedMessage(ActionModified state) : StateMessage<ActionModified>(state) { }
 public sealed class UndoActionMessage(UndoActionState state) : StateMessage<UndoActionState>(state) { }
-public sealed class PriorityChangedMessage(PriorityChanged state) : StateMessage<PriorityChanged>(state) { }
-public sealed class HonorStateMessage(HonorState state) : StateMessage<HonorState>(state) { }

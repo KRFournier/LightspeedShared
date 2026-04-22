@@ -1,12 +1,14 @@
-﻿namespace Lightspeed;
+﻿using MessagePack;
+
+namespace Lightspeed;
 
 /// <summary>
 /// The settings for a set of matches
 /// </summary>
+[Union(0, typeof(StandardMatchSettings))]
+[MessagePackObject]
 public class MatchSettings
 {
-    public int WinningScore { get; set; } = 12;
-    public TimeSpan TimeLimit { get; set; } = TimeSpan.FromSeconds(90);
-    public int Rounds { get; set; } = 1;
+    [Key(0)]
     public bool IsLocked { get; set; } = false;
 }

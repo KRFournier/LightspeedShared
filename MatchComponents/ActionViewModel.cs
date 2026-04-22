@@ -1,14 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lightspeed.Network;
 
-namespace Lightspeed.ViewModels;
+namespace Lightspeed.MatchComponents;
 
 /// <summary>
-/// Base class for all action view models. Each action is a view model so we can customize it's
-/// appearance with a matching view.
+/// Represents a single action that occurred during a match, including the type of action, the actor, the scorer, and any points awarded.
 /// </summary>
-public partial class ActionViewModel : ObservableObject
+public partial class ActionViewModel<T> : ObservableObject where T : ParticipantViewModel
 {
     #region Properties
 
@@ -22,10 +20,10 @@ public partial class ActionViewModel : ObservableObject
     public partial string? SubType { get; set; }
 
     [ObservableProperty]
-    public partial ScoreViewModel? Actor { get; set; }
+    public partial SideViewModel<T>? Actor { get; set; }
 
     [ObservableProperty]
-    public partial ScoreViewModel? Scorer { get; set; }
+    public partial SideViewModel<T>? Scorer { get; set; }
 
     [ObservableProperty]
     public partial int Points { get; set; } = 0;
@@ -77,13 +75,13 @@ public partial class ActionViewModel : ObservableObject
     {
         Scorer?.Points += Points;
 
-        if (Actor is not null && Actor.Participant.CurrentPlayer is not null)
+        if (Actor is not null)
         {
             switch (Type)
             {
-                case ActionType.Card: Actor.Participant.CurrentPlayer.Card++; break;
-                case ActionType.Conceded: Actor.Participant.CurrentPlayer.Honor++; break;
-                case ActionType.Ejected: Actor.Participant.CurrentPlayer.IsEjected = true; break;
+                case ActionType.Card: Actor.Participant.Penalties.GiveCard(); break;
+                case ActionType.Conceded: Actor.Participant.Honor.AddHonor(); break;
+                case ActionType.Ejected: Actor.Participant.Penalties.Eject(); break;
                 case ActionType.Penalty: Actor.MinorViolations++; break;
             }
         }
@@ -93,13 +91,13 @@ public partial class ActionViewModel : ObservableObject
     {
         Scorer?.Points -= Points;
 
-        if (Actor is not null && Actor.Participant.CurrentPlayer is not null)
+        if (Actor is not null)
         {
             switch (Type)
             {
-                case ActionType.Card: Actor.Participant.CurrentPlayer.Card--; break;
-                case ActionType.Conceded: Actor.Participant.CurrentPlayer.Honor--; break;
-                case ActionType.Ejected: Actor.Participant.CurrentPlayer.IsEjected = false; break;
+                case ActionType.Card: Actor.Participant.Penalties.RemoveCard(); break;
+                case ActionType.Conceded: Actor.Participant.Honor.RemoveHonor(); break;
+                case ActionType.Ejected: Actor.Participant.Penalties.Uneject(); break;
                 case ActionType.Penalty: Actor.MinorViolations--; break;
             }
         }
@@ -107,21 +105,30 @@ public partial class ActionViewModel : ObservableObject
 
     #endregion
 
-    public Lightspeed.Action ToModel(MatchViewModel match) => new()
+    #region Factories
+
+    public static ActionViewModel<T> NewConcession(SideViewModel<T>? actor, SideViewModel<T>? scorer) => new()
     {
-        Id = Guid,
-        Actor = Actor == match.First ? Side.First : (Actor == match.Second ? Side.Second : Side.Neither),
-        Scorer = Scorer == match.First ? Side.First : (Scorer == match.Second ? Side.Second : Side.Neither),
-        Points = Points,
-        Type = Type,
-        SubType = SubType
+        Type = ActionType.Conceded,
+        Actor = actor,
+        Scorer = scorer,
+        Points = PointValues.Conceded
     };
 
-    public ActionState ToState(MatchViewModel match) => new()
+    public static ActionViewModel<T> NewOutOfBounds(SideViewModel<T>? actor, SideViewModel<T>? scorer) => new()
+    {
+        Type = ActionType.OutOfBounds,
+        Actor = actor,
+        Scorer = scorer
+    };
+
+    #endregion
+
+    public Lightspeed.Action ToModel(LeftRightViewModel<T> sides) => new()
     {
         Id = Guid,
-        Actor = Actor == match.First ? Side.First : (Actor == match.Second ? Side.Second : Side.Neither),
-        Scorer = Scorer == match.First ? Side.First : (Scorer == match.Second ? Side.Second : Side.Neither),
+        Actor = sides.ToReference(Actor),
+        Scorer = sides.ToReference(Scorer),
         Points = Points,
         Type = Type,
         SubType = SubType

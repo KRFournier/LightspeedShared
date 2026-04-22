@@ -1,4 +1,6 @@
-﻿using Lightspeed.ViewModels;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Lightspeed.MatchComponents;
+using Lightspeed.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lightspeed.Services;
@@ -6,21 +8,25 @@ namespace Lightspeed.Services;
 /// <summary>
 /// This factory is used to create view models from models after they have been loaded from the database.
 /// </summary>
-public class SharedLoadingService(IServiceProvider serviceProvider)
+public class SharedLoadingService(IServiceProvider serviceProvider, IMessenger messenger)
 {
     #region Caches
 
+    private readonly Dictionary<Guid, CompetitorViewModel> _competitors = [];
     private readonly Dictionary<Guid, ParticipantViewModel> _participants = [];
     private readonly Dictionary<Guid, MatchViewModel> _matches = [];
 
-    public ParticipantViewModel FindParticipant(Guid id)
+    public CompetitorViewModel FindCompetitor(Guid id)
     {
-        if (id == Guid.Empty)
-            return New<EmptyParticipantViewModel>();
-        else if (id == ByeParticipant.ByeGuid)
-            return New<ByeViewModel>();
-        else if (_participants.TryGetValue(id, out var participant))
-            return participant;
+        if (_competitors.TryGetValue(id, out var competitor))
+            return competitor;
+        throw new InvalidOperationException($"Competitor with id {id} not found.");
+    }
+
+    public T FindParticipant<T>(Guid id) where T : ParticipantViewModel
+    {
+        if (_participants.TryGetValue(id, out var participant) && participant is T typed)
+            return typed;
         throw new InvalidOperationException($"Participant with id {id} not found.");
     }
 
@@ -41,20 +47,33 @@ public class SharedLoadingService(IServiceProvider serviceProvider)
     /// <summary>
     /// Loads a new action view model from an <see cref="Action"/> model.
     /// </summary>
-    protected ActionViewModel LoadAction(MatchViewModel match, Action model)
+    protected static ActionViewModel<T> LoadAction<T>(LeftRightViewModel<T> sides, Action model) where T : ParticipantViewModel
     {
-        var vm = New<ActionViewModel>();
-        vm.Guid = model.Id;
-        vm.Actor = model.Actor == Side.First ? match.First : (model.Actor == Side.Second ? match.Second : null);
-        vm.Scorer = model.Scorer == Side.First ? match.First : (model.Scorer == Side.Second ? match.Second : null);
-        vm.Points = model.Points;
-        vm.Type = model.Type;
-        vm.SubType = model.SubType;
-        return vm;
+        return new ActionViewModel<T>
+        {
+            Guid = model.Id,
+            Actor = sides.ToSide(model.Actor),
+            Scorer = sides.ToSide(model.Scorer),
+            Points = model.Points,
+            Type = model.Type,
+            SubType = model.SubType
+        };
     }
 
     /// <summary>
-    /// Loads a clock view model from a <see cref="Clock"/> model.
+    /// Loads a new actions component for a match
+    /// </summary>
+    protected static ActionsViewModel<T> LoadActions<T>(ClockViewModel clock, LeftRightViewModel<T> sides, PriorityViewModel<T>? priority, IEnumerable<Action> models)
+        where T : ParticipantViewModel
+    {
+        return new ActionsViewModel<T>(clock, sides, priority)
+        {
+            Actions = [.. models.Select(a => LoadAction(sides, a))]
+        };
+    }
+
+    /// <summary>
+    /// Loads a clock component for a match
     /// </summary>
     protected ClockViewModel LoadClock(Clock model)
     {
@@ -65,98 +84,112 @@ public class SharedLoadingService(IServiceProvider serviceProvider)
     }
 
     /// <summary>
+    /// Loads a priority component for a match
+    /// </summary>
+    protected PriorityViewModel<T> LoadPriority<T>(Guid matchGuid, LeftRightViewModel<T> sides, Priority model) where T : ParticipantViewModel
+    {
+        return new PriorityViewModel<T>(matchGuid, sides, messenger)
+        {
+            PrioritySide = model.PrioritySide,
+            PriorityPoints = model.PriorityPoints,
+            InPriority = model.InPriority
+        };
+    }
+
+    /// <summary>
     /// Loads a new match settings view model from a <see cref="MatchSettings"/> model.
     /// </summary>
-    public MatchSettingsViewModel LoadMatchSettings(MatchSettings model)
+    public StandardMatchSettingsViewModel LoadStandardMatchSettings(StandardMatchSettings model)
     {
-        var vm = New<MatchSettingsViewModel>();
+        var vm = New<StandardMatchSettingsViewModel>();
+
+        LoadMatchSettingsBase(vm, model);
+
         vm.WinningScore = model.WinningScore;
         vm.TimeLimit = model.TimeLimit;
         vm.Rounds = model.Rounds;
-        vm.IsLocked = model.IsLocked;
+
         return vm;
+    }
+
+    /// <summary>
+    /// Called by other match setting loaders to set the base class properties
+    /// </summary>
+    protected static void LoadMatchSettingsBase(MatchSettingsViewModel settings, MatchSettings model)
+    {
+        settings.IsLocked = model.IsLocked;
     }
 
     /// <summary>
     /// Loads a new match view model from a <see cref="Match"/> model.
     /// The type of the match view model will depend on the type of the match model.
     /// </summary>
-    public MatchViewModel LoadMatch(Match? model) => model switch
+    public MatchViewModel LoadMatch(Match? model, MatchSettingsViewModel settings)
     {
-        StandardMatch standardMatch => LoadStandardMatch(standardMatch),
-        null => New<MatchNotFoundViewModel>(),
-        _ => throw new NotSupportedException($"Match type {model.GetType().Name} is not supported."),
-    };
+        if (model is null)
+            return New<MatchNotFoundViewModel>();
+
+        if (model is StandardMatch standardMatch && settings is StandardMatchSettingsViewModel standardSettings)
+            return LoadStandardMatch(standardMatch, standardSettings);
+
+        throw new NotSupportedException($"Match type {model.GetType().Name} is not supported.");
+    }
 
     /// <summary>
-    /// Loads a new participant from the model.
-    /// The type of the participant view model will depend on the type of the participant model.
+    /// Loads a left/right component for a match
     /// </summary>
-    public ParticipantViewModel LoadParticipant(IParticipant participant) => participant switch
+    protected LeftRightViewModel<T> LoadLeftRightScores<T>(LeftRightSide model) where T : ParticipantViewModel
     {
-        Player player => LoadPlayer(player),
-        ByeParticipant => New<ByeViewModel>(),
-        EmptyParticipant => New<EmptyParticipantViewModel>(),
-        _ => throw new NotSupportedException($"Participant type {participant.GetType().Name} is not supported."),
-    };
-
-    /// <summary>
-    /// Loads a new player view model from a <see cref="Player"/>
-    /// </summary>
-    protected PlayerViewModel LoadPlayer(Player player)
-    {
-        var vm = New<PlayerViewModel>();
-        vm.Guid = player.Id;
-        vm.FirstName = player.FirstName;
-        vm.LastName = player.LastName;
-        vm.OnlineId = player.OnlineId;
-        vm.Club = player.Club;
-        vm.Rank = player.Rank;
-        vm.Card = player.Card;
-        vm.Honor = player.Honor;
-        vm.IsEjected = player.IsEjected;
-        vm.WeaponOfChoice = player.WeaponOfChoice;
-        vm.ShowWeapon = player.ShowWeapon;
-
-        _participants.Add(vm.Guid, vm);
-
+        var vm = new LeftRightViewModel<T>
+        {
+            Left = LoadSide<T>(model.Left),
+            Right = LoadSide<T>(model.Right)
+        };
         return vm;
     }
 
     /// <summary>
-    /// Loads a new score view model from a <see cref="Score"/>.
-    /// If the score has a parent match, it will bind to the winner or loser of that match.
+    /// Loads a side that belongs to one side of a left/right match.
     /// </summary>
-    protected ScoreViewModel LoadScore(Score model)
+    protected SideViewModel<T>? LoadSide<T>(Side? model) where T : ParticipantViewModel
     {
-        var vm = New<ScoreViewModel>();
-        vm.Participant = FindParticipant(model.Participant);
-        vm.Points = model.Points;
-        vm.Seed = model.Seed;
-        return vm;
+        if (model is null)
+            return null;
+
+        return new SideViewModel<T>
+        {
+            Participant = FindParticipant<T>(model.Participant),
+            Points = model.Points,
+            MinorViolations = model.MinorViolations
+        };
     }
 
     /// <summary>
     /// Loads a new view model from a <see cref="StandardMatch"/>
     /// </summary>
-    protected StandardMatchViewModel LoadStandardMatch(StandardMatch model)
+    protected StandardMatchViewModel LoadStandardMatch(StandardMatch model, StandardMatchSettingsViewModel settings)
     {
         var vm = New<StandardMatchViewModel>();
-        vm.Guid = model.Id;
-        vm.Number = model.Number;
-        vm.Clock = LoadClock(model.Clock);
-        vm.First = LoadScore(model.First);
-        vm.Second = LoadScore(model.Second);
-        vm.IsMatchStarted = model.IsMatchStarted;
-        vm.PrioritySide = model.Priority.PrioritySide;
-        vm.PriorityPoints = model.Priority.PriorityPoints;
-        vm.InPriority = model.Priority.InPriority;
-        vm.WinningSide = model.Winner;
 
-        vm.Actions = [.. model.Actions.Select(a => LoadAction(vm, a))];
+        LoadMatchBase(vm, model);
+
+        vm.Settings = settings;
+        vm.Clock = LoadClock(model.Clock);
+        vm.Scores = LoadLeftRightScores<StandardPlayerViewModel>(model.Scores);
+        vm.Priority = LoadPriority(vm.Guid, vm.Scores, model.Priority);
+        vm.Actions = LoadActions(vm.Clock, vm.Scores, vm.Priority, model.Actions);
 
         _matches.Add(vm.Guid, vm);
 
         return vm;
+    }
+
+    /// <summary>
+    /// Called by other match loaders to load the base class properties
+    /// </summary>
+    protected static void LoadMatchBase(MatchViewModel match, Match model)
+    {
+        match.Guid = model.Id;
+        match.Number = model.Number;
     }
 }

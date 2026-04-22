@@ -1,18 +1,22 @@
-﻿namespace Lightspeed;
+﻿using MessagePack;
+
+namespace Lightspeed;
 
 /// <summary>
 /// A player's rank
 /// </summary>
+[MessagePackObject]
 public readonly struct Rank : IComparable<Rank>
 {
     /// <summary>
     /// The rank, repesented by a single letter
-    /// </summary>
+    /// </summary>    
     private readonly char _rank;
 
     /// <summary>
     /// The rank's power for tournament measurement purposes
     /// </summary>
+    [IgnoreMember]
     public int Power => _rank switch
     {
         'A' => 50,
@@ -26,6 +30,7 @@ public readonly struct Rank : IComparable<Rank>
     /// <summary>
     /// The rank's weight for balancing purposes
     /// </summary>
+    [IgnoreMember]
     public int Weight => _rank switch
     {
         'A' => 6,
@@ -39,11 +44,13 @@ public readonly struct Rank : IComparable<Rank>
     /// <summary>
     /// The letter representation of the rank
     /// </summary>
+    [Key(0)]
     public char Letter => _rank;
 
     /// <summary>
     /// Contruct from character
     /// </summary>
+    [SerializationConstructor]
     public Rank(char rank)
     {
         _rank = rank switch

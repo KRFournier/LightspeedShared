@@ -1,4 +1,5 @@
-﻿using Lightspeed.ViewModels;
+﻿using Lightspeed.MatchComponents;
+using Lightspeed.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lightspeed.Services;
@@ -11,24 +12,45 @@ public class MatchFactory(IServiceProvider serviceProvider)
     /// <summary>
     /// Creates a new match with the given participants and an optional match number.
     /// </summary>
-    public T NewMatch<T>(ParticipantViewModel first, ParticipantViewModel second, int? number = null) where T : MatchViewModel
+    public StandardMatchViewModel NewStandardMatch(StandardPlayerViewModel left, StandardPlayerViewModel right, int? number = null)
     {
-        var match = serviceProvider.GetRequiredService<T>();
+        var match = serviceProvider.GetRequiredService<StandardMatchViewModel>();
         match.Number = number;
-        match.First = NewScore(first);
-        match.Second = NewScore(second);
+        match.Scores = NewScores(left, right);
         return match;
     }
+
+    /// <summary>
+    /// Creates a new set of scores for a match
+    /// </summary>
+    public LeftRightViewModel<T> NewScores<T>(T left, T right) where T : ParticipantViewModel
+    {
+        var scores = serviceProvider.GetRequiredService<LeftRightViewModel<T>>();
+        scores.Left = NewScore(left);
+        scores.Right = NewScore(right);
+        return scores;
+    }
+
+    /// <summary>
+    /// Creates a new view model with the specified participant.
+    /// </summary>
+    /// <param name="participant"></param>
+    /// <returns></returns>
+    public static SideViewModel<T> NewScore<T>(T participant) where T : ParticipantViewModel => new()
+    {
+        Participant = participant
+    };
 
     /// <summary>
     /// Creates a new match with the given participants and seeds. This is used for creating matches from a ranked list of participants,
     /// where some participants may have byes. If a participant is null, it will be treated as a bye.
     /// </summary>
-    public T NewMatch<T>(ParticipantViewModel? first, int firstSeed, ParticipantViewModel? second, int secondSeed) where T : MatchViewModel
+    public BracketMatchViewModel NewSeededStandardMatch<T>(StandardPlayerViewModel? left, int leftSeed, StandardPlayerViewModel? right, int rightSeed)
     {
-        var match = serviceProvider.GetRequiredService<T>();
-        match.First = first is not null ? NewScore(first, firstSeed) : NewScore(serviceProvider.GetRequiredService<ByeViewModel>());
-        match.Second = second is not null ? NewScore(second, secondSeed) : NewScore(serviceProvider.GetRequiredService<ByeViewModel>());
+        var match = serviceProvider.GetRequiredService<BracketMatchViewModel>();
+        match.Match = serviceProvider.GetRequiredService<StandardMatchViewModel>();
+        match.LeftSeed = leftSeed;
+        match.RightSeed = rightSeed;
         return match;
     }
 
@@ -39,43 +61,6 @@ public class MatchFactory(IServiceProvider serviceProvider)
     public T NewEmptyMatch<T>() where T : MatchViewModel
     {
         var match = serviceProvider.GetRequiredService<T>();
-        match.First = NewScore(serviceProvider.GetRequiredService<EmptyParticipantViewModel>());
-        match.Second = NewScore(serviceProvider.GetRequiredService<EmptyParticipantViewModel>());
         return match;
-    }
-
-    /// <summary>
-    /// Creates a new view model with the specified participant.
-    /// </summary>
-    /// <param name="participant"></param>
-    /// <returns></returns>
-    public ScoreViewModel NewScore(ParticipantViewModel participant, int? seed = null)
-    {
-        var vm = serviceProvider.GetRequiredService<ScoreViewModel>();
-        vm.Participant = participant;
-        vm.Seed = seed;
-        return vm;
-    }
-
-    /// <summary>
-    /// Creates a new clock view model with the specified settings.
-    /// </summary>
-    public ClockViewModel NewClock(MatchSettingsViewModel settings)
-    {
-        var vm = serviceProvider.GetRequiredService<ClockViewModel>();
-        vm.TimeStart = settings.TimeLimit;
-        vm.TotalRounds = settings.Rounds;
-        return vm;
-    }
-
-    /// <summary>
-    /// Creates a new clock view model with the specified settings.
-    /// </summary>
-    public ClockViewModel NewClock(TimeSpan timeLimit)
-    {
-        var vm = serviceProvider.GetRequiredService<ClockViewModel>();
-        vm.TimeStart = timeLimit;
-        vm.TotalRounds = 1;
-        return vm;
     }
 }

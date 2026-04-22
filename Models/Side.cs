@@ -1,11 +1,19 @@
-﻿namespace Lightspeed;
+﻿using MessagePack;
+
+namespace Lightspeed;
 
 /// <summary>
-/// Identifies a participant's side in the match.
+/// Represents one side of a two-sided match. This tracks the participant, their score, and any minor violations they have received.
 /// </summary>
-public enum Side
+[MessagePackObject]
+public class Side
 {
-    Neither,
-    First,
-    Second
+    [Key(0)]
+    public Guid Participant { get; set; }
+
+    [Key(1)]
+    public int Points { get; set; } = 0;
+
+    [Key(2)]
+    public int MinorViolations { get; set; } = 0;
 }
