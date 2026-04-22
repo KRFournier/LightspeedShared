@@ -2,11 +2,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Lightspeed.MatchComponents;
-using Lightspeed.Network;
-using Lightspeed.Network.Messages;
 using Lightspeed.Services;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.ObjectModel;
 
 namespace Lightspeed.ViewModels;
 
@@ -24,13 +21,13 @@ public partial class StandardMatchViewModel : MatchViewModel
     public partial ClockViewModel Clock { get; set; }
 
     [ObservableProperty]
-    public partial LeftRightViewModel<StandardPlayerViewModel> Scores { get; set; }
+    public partial LeftRightViewModel Scores { get; set; }
 
     [ObservableProperty]
-    public partial PriorityViewModel<StandardPlayerViewModel> Priority { get; set; }
+    public partial PriorityViewModel Priority { get; set; }
 
     [ObservableProperty]
-    public partial ActionsViewModel<StandardPlayerViewModel> Actions { get; set; }
+    public partial ActionsViewModel Actions { get; set; }
 
     #endregion
 

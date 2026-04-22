@@ -6,7 +6,7 @@ namespace Lightspeed.MatchComponents;
 /// <summary>
 /// Represents a single action that occurred during a match, including the type of action, the actor, the scorer, and any points awarded.
 /// </summary>
-public partial class ActionViewModel<T> : ObservableObject where T : ParticipantViewModel
+public partial class ActionViewModel : ObservableObject
 {
     #region Properties
 
@@ -20,10 +20,10 @@ public partial class ActionViewModel<T> : ObservableObject where T : Participant
     public partial string? SubType { get; set; }
 
     [ObservableProperty]
-    public partial SideViewModel<T>? Actor { get; set; }
+    public partial SideViewModel? Actor { get; set; }
 
     [ObservableProperty]
-    public partial SideViewModel<T>? Scorer { get; set; }
+    public partial SideViewModel? Scorer { get; set; }
 
     [ObservableProperty]
     public partial int Points { get; set; } = 0;
@@ -107,7 +107,7 @@ public partial class ActionViewModel<T> : ObservableObject where T : Participant
 
     #region Factories
 
-    public static ActionViewModel<T> NewConcession(SideViewModel<T>? actor, SideViewModel<T>? scorer) => new()
+    public static ActionViewModel NewConcession(SideViewModel? actor, SideViewModel? scorer) => new()
     {
         Type = ActionType.Conceded,
         Actor = actor,
@@ -115,7 +115,7 @@ public partial class ActionViewModel<T> : ObservableObject where T : Participant
         Points = PointValues.Conceded
     };
 
-    public static ActionViewModel<T> NewOutOfBounds(SideViewModel<T>? actor, SideViewModel<T>? scorer) => new()
+    public static ActionViewModel NewOutOfBounds(SideViewModel? actor, SideViewModel? scorer) => new()
     {
         Type = ActionType.OutOfBounds,
         Actor = actor,
@@ -124,7 +124,7 @@ public partial class ActionViewModel<T> : ObservableObject where T : Participant
 
     #endregion
 
-    public Lightspeed.Action ToModel(LeftRightViewModel<T> sides) => new()
+    public Lightspeed.Action ToModel(LeftRightViewModel sides) => new()
     {
         Id = Guid,
         Actor = sides.ToReference(Actor),

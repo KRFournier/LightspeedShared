@@ -8,12 +8,12 @@ namespace Lightspeed.MatchComponents;
 /// <summary>
 /// Adds actions to a match, which means the UI will allow users to input actions instead of just points
 /// </summary>
-public partial class ActionsViewModel<T>(ClockViewModel clock, LeftRightViewModel<T> sides, PriorityViewModel<T>? priority) : ObservableObject where T : ParticipantViewModel
+public partial class ActionsViewModel(ClockViewModel clock, LeftRightViewModel sides, PriorityViewModel? priority) : ObservableObject
 {
     /// <summary>
     /// The actions, in order of their occurrence
     /// </summary>
-    public ObservableCollection<ActionViewModel<T>> Actions { get; set; } = [];
+    public ObservableCollection<ActionViewModel> Actions { get; set; } = [];
 
     /// <summary>
     /// Converts to the model representation
@@ -23,7 +23,7 @@ public partial class ActionsViewModel<T>(ClockViewModel clock, LeftRightViewMode
     /// <summary>
     /// Adds and applies the action, overriding with priority if necessary
     /// </summary>
-    public void AddAction(ActionViewModel<T> action)
+    public void AddAction(ActionViewModel action)
     {
         // process priority
         if (priority is not null && priority.InPriority)

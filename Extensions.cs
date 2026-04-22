@@ -34,7 +34,7 @@ public static class Extensions
     /// <summary>
     /// Gets the side reference (Left, Right, or Neither) for a given SideViewModel within a LeftRightViewModel.
     /// </summary>
-    public static SideReference ToReference<T>(this LeftRightViewModel<T> sides, SideViewModel<T>? side) where T : ParticipantViewModel
+    public static SideReference ToReference(this LeftRightViewModel sides, SideViewModel? side)
     {
         if (side == sides.Left)
             return SideReference.Left;
@@ -56,7 +56,7 @@ public static class Extensions
     /// <summary>
     /// Gets the side for a given reference
     /// </summary>
-    public static SideViewModel<T>? ToSide<T>(this LeftRightViewModel<T> sides, SideReference reference) where T : ParticipantViewModel =>
+    public static SideViewModel? ToSide(this LeftRightViewModel sides, SideReference reference) =>
         reference switch
         {
             SideReference.Left => sides.Left,

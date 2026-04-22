@@ -9,8 +9,7 @@ namespace Lightspeed.MatchComponents;
 /// <summary>
 /// This class manages priority for a left-right match.
 /// </summary>
-public partial class PriorityViewModel<T> : ObservableObject, IRecipient<PriorityChangedMessage>
-    where T : ParticipantViewModel
+public partial class PriorityViewModel : ObservableObject, IRecipient<PriorityChangedMessage>
 {
     /// <summary>
     /// used to assign random priority in the case of a coin flip
@@ -20,7 +19,7 @@ public partial class PriorityViewModel<T> : ObservableObject, IRecipient<Priorit
     /// <summary>
     /// The two-sides of the match
     /// </summary>
-    private readonly LeftRightViewModel<T> _sides;
+    private readonly LeftRightViewModel _sides;
 
     #region Properties
 
@@ -39,7 +38,7 @@ public partial class PriorityViewModel<T> : ObservableObject, IRecipient<Priorit
     [NotifyPropertyChangedFor(nameof(LeftHasPriority))]
     [NotifyPropertyChangedFor(nameof(RightHasPriority))]
     [NotifyPropertyChangedFor(nameof(PrioritySide))]
-    public partial SideViewModel<T>? Priority { get; set; }
+    public partial SideViewModel? Priority { get; set; }
 
     /// <summary>
     /// Determines if priority is active
@@ -130,10 +129,10 @@ public partial class PriorityViewModel<T> : ObservableObject, IRecipient<Priorit
 
     #endregion
 
-    public PriorityViewModel(Guid matchGuid, LeftRightViewModel<T> sides, IMessenger messenger)
+    public PriorityViewModel(Guid matchGuid, LeftRightViewModel sides, IMessenger? messenger = null)
     {
         _sides = sides;
-        messenger.RegisterAll(this, matchGuid);
+        messenger?.RegisterAll(this, matchGuid);
     }
 
     public Priority ToModel() => new()

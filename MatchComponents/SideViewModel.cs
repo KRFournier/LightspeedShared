@@ -6,7 +6,7 @@ namespace Lightspeed.MatchComponents;
 /// <summary>
 /// Represents one side of a two-sided match. This tracks the participant, their score, and any minor violations they have received.
 /// </summary>
-public partial class SideViewModel<T> : ObservableObject where T : ParticipantViewModel
+public partial class SideViewModel : ObservableObject
 {
     #region Properties
 
@@ -14,7 +14,7 @@ public partial class SideViewModel<T> : ObservableObject where T : ParticipantVi
     /// The participant to whom this score belongs. This will automatically be set if this score is linked to a parent match.
     /// </summary>
     [ObservableProperty]
-    public partial T Participant { get; set; }
+    public partial ParticipantViewModel Participant { get; set; }
 
     /// <summary>
     /// The participant's score in this match.
@@ -36,7 +36,7 @@ public partial class SideViewModel<T> : ObservableObject where T : ParticipantVi
     /// Adds a minor violation to this participant.
     /// </summary>
     [RelayCommand]
-    private void GiveMinorViolation() => MinorViolations++;
+    public void GiveMinorViolation() => MinorViolations++;
 
     #endregion
 

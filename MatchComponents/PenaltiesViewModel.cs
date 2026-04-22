@@ -102,9 +102,9 @@ public partial class PenaltiesViewModel : ObservableObject, IRecipient<Penalties
 
     #endregion
 
-    public PenaltiesViewModel(Guid participantGuid, IMessenger messenger)
+    public PenaltiesViewModel(Guid participantGuid, IMessenger? messenger)
     {
-        messenger.Register(this, participantGuid);
+        messenger?.Register(this, participantGuid);
     }
 
     public Penalties ToModel() => new()

@@ -2,7 +2,7 @@
 
 namespace Lightspeed;
 
-[Union(0, typeof(StandardPlayer))]
+[Union(0, typeof(SinglePlayer))]
 [MessagePackObject]
 public class Participant
 {
@@ -14,7 +14,4 @@ public class Participant
 
     [Key(2)]
     public Penalties Penalties { get; set; } = new();
-
-    [Key(3)]
-    public int? Seed { get; set; }
 }

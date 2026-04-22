@@ -1,11 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Lightspeed.MatchComponents;
 
 /// <summary>
 /// Represents a two-sided match with a left and right side.
 /// </summary>
-public partial class LeftRightViewModel<T> : ObservableObject where T : ParticipantViewModel
+public partial class LeftRightViewModel : ObservableObject
 {
     #region Properties
 
@@ -15,7 +16,7 @@ public partial class LeftRightViewModel<T> : ObservableObject where T : Particip
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
     [NotifyPropertyChangedFor(nameof(HasBye))]
-    public partial SideViewModel<T>? Left { get; set; }
+    public partial SideViewModel? Left { get; set; }
 
     /// <summary>
     /// The right side of the match, representing the other participant and their score.
@@ -23,7 +24,7 @@ public partial class LeftRightViewModel<T> : ObservableObject where T : Particip
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
     [NotifyPropertyChangedFor(nameof(HasBye))]
-    public partial SideViewModel<T>? Right { get; set; }
+    public partial SideViewModel? Right { get; set; }
 
     /// <summary>
     /// Determines if the left and right sides are swapped. This is used for display purposes and does not affect the underlying data.
@@ -40,7 +41,7 @@ public partial class LeftRightViewModel<T> : ObservableObject where T : Particip
     [NotifyPropertyChangedFor(nameof(WinningSide))]
     [NotifyPropertyChangedFor(nameof(IsLeftWinner))]
     [NotifyPropertyChangedFor(nameof(IsRightWinner))]
-    public partial SideViewModel<T>? Winner { get; set; }
+    public partial SideViewModel? Winner { get; set; }
 
     /// <summary>
     /// The winner referenced by position in the match
@@ -54,7 +55,7 @@ public partial class LeftRightViewModel<T> : ObservableObject where T : Particip
     /// <summary>
     /// The loser of the match
     /// </summary>
-    public SideViewModel<T>? Loser
+    public SideViewModel? Loser
     {
         get
         {
@@ -93,6 +94,13 @@ public partial class LeftRightViewModel<T> : ObservableObject where T : Particip
     /// A match is empty when both sides are null
     /// </summary>
     public bool IsEmpty => Left is null && Right is null;
+
+    #endregion
+
+    #region Commands
+
+    [RelayCommand]
+    public void SwapSides() => IsSwapped = !IsSwapped;
 
     #endregion
 

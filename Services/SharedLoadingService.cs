@@ -23,10 +23,10 @@ public class SharedLoadingService(IServiceProvider serviceProvider, IMessenger m
         throw new InvalidOperationException($"Competitor with id {id} not found.");
     }
 
-    public T FindParticipant<T>(Guid id) where T : ParticipantViewModel
+    public ParticipantViewModel FindParticipant(Guid id)
     {
-        if (_participants.TryGetValue(id, out var participant) && participant is T typed)
-            return typed;
+        if (_participants.TryGetValue(id, out var participant))
+            return participant;
         throw new InvalidOperationException($"Participant with id {id} not found.");
     }
 
@@ -47,30 +47,23 @@ public class SharedLoadingService(IServiceProvider serviceProvider, IMessenger m
     /// <summary>
     /// Loads a new action view model from an <see cref="Action"/> model.
     /// </summary>
-    protected static ActionViewModel<T> LoadAction<T>(LeftRightViewModel<T> sides, Action model) where T : ParticipantViewModel
+    protected static ActionViewModel LoadAction(LeftRightViewModel sides, Action model) => new()
     {
-        return new ActionViewModel<T>
-        {
-            Guid = model.Id,
-            Actor = sides.ToSide(model.Actor),
-            Scorer = sides.ToSide(model.Scorer),
-            Points = model.Points,
-            Type = model.Type,
-            SubType = model.SubType
-        };
-    }
+        Guid = model.Id,
+        Actor = sides.ToSide(model.Actor),
+        Scorer = sides.ToSide(model.Scorer),
+        Points = model.Points,
+        Type = model.Type,
+        SubType = model.SubType
+    };
 
     /// <summary>
     /// Loads a new actions component for a match
     /// </summary>
-    protected static ActionsViewModel<T> LoadActions<T>(ClockViewModel clock, LeftRightViewModel<T> sides, PriorityViewModel<T>? priority, IEnumerable<Action> models)
-        where T : ParticipantViewModel
+    protected static ActionsViewModel LoadActions(ClockViewModel clock, LeftRightViewModel sides, PriorityViewModel? priority, IEnumerable<Action> models) => new(clock, sides, priority)
     {
-        return new ActionsViewModel<T>(clock, sides, priority)
-        {
-            Actions = [.. models.Select(a => LoadAction(sides, a))]
-        };
-    }
+        Actions = [.. models.Select(a => LoadAction(sides, a))]
+    };
 
     /// <summary>
     /// Loads a clock component for a match
@@ -86,15 +79,12 @@ public class SharedLoadingService(IServiceProvider serviceProvider, IMessenger m
     /// <summary>
     /// Loads a priority component for a match
     /// </summary>
-    protected PriorityViewModel<T> LoadPriority<T>(Guid matchGuid, LeftRightViewModel<T> sides, Priority model) where T : ParticipantViewModel
+    protected PriorityViewModel LoadPriority(Guid matchGuid, LeftRightViewModel sides, Priority model) => new(matchGuid, sides, messenger)
     {
-        return new PriorityViewModel<T>(matchGuid, sides, messenger)
-        {
-            PrioritySide = model.PrioritySide,
-            PriorityPoints = model.PriorityPoints,
-            InPriority = model.InPriority
-        };
-    }
+        PrioritySide = model.PrioritySide,
+        PriorityPoints = model.PriorityPoints,
+        InPriority = model.InPriority
+    };
 
     /// <summary>
     /// Loads a new match settings view model from a <see cref="MatchSettings"/> model.
@@ -115,10 +105,7 @@ public class SharedLoadingService(IServiceProvider serviceProvider, IMessenger m
     /// <summary>
     /// Called by other match setting loaders to set the base class properties
     /// </summary>
-    protected static void LoadMatchSettingsBase(MatchSettingsViewModel settings, MatchSettings model)
-    {
-        settings.IsLocked = model.IsLocked;
-    }
+    protected static void LoadMatchSettingsBase(MatchSettingsViewModel settings, MatchSettings model) => settings.IsLocked = model.IsLocked;
 
     /// <summary>
     /// Loads a new match view model from a <see cref="Match"/> model.
@@ -138,12 +125,12 @@ public class SharedLoadingService(IServiceProvider serviceProvider, IMessenger m
     /// <summary>
     /// Loads a left/right component for a match
     /// </summary>
-    protected LeftRightViewModel<T> LoadLeftRightScores<T>(LeftRightSide model) where T : ParticipantViewModel
+    protected LeftRightViewModel LoadLeftRight(LeftRightSide model)
     {
-        var vm = new LeftRightViewModel<T>
+        var vm = new LeftRightViewModel
         {
-            Left = LoadSide<T>(model.Left),
-            Right = LoadSide<T>(model.Right)
+            Left = LoadSide(model.Left),
+            Right = LoadSide(model.Right)
         };
         return vm;
     }
@@ -151,14 +138,14 @@ public class SharedLoadingService(IServiceProvider serviceProvider, IMessenger m
     /// <summary>
     /// Loads a side that belongs to one side of a left/right match.
     /// </summary>
-    protected SideViewModel<T>? LoadSide<T>(Side? model) where T : ParticipantViewModel
+    protected SideViewModel? LoadSide(Side? model)
     {
         if (model is null)
             return null;
 
-        return new SideViewModel<T>
+        return new SideViewModel
         {
-            Participant = FindParticipant<T>(model.Participant),
+            Participant = FindParticipant(model.Participant),
             Points = model.Points,
             MinorViolations = model.MinorViolations
         };
@@ -175,7 +162,7 @@ public class SharedLoadingService(IServiceProvider serviceProvider, IMessenger m
 
         vm.Settings = settings;
         vm.Clock = LoadClock(model.Clock);
-        vm.Scores = LoadLeftRightScores<StandardPlayerViewModel>(model.Scores);
+        vm.Scores = LoadLeftRight(model.Scores);
         vm.Priority = LoadPriority(vm.Guid, vm.Scores, model.Priority);
         vm.Actions = LoadActions(vm.Clock, vm.Scores, vm.Priority, model.Actions);
 

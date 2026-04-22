@@ -6,8 +6,8 @@ namespace Lightspeed;
 /// Represents an individual fencer in a tournament.
 /// </summary>
 [MessagePackObject]
-public sealed class StandardPlayer : Participant
+public sealed class SinglePlayer : Participant
 {
-    [Key(4)]
-    public Competitor Competitor { get; set; } = new();
+    [Key(3)]
+    public Guid Competitor { get; set; } = new();
 }

@@ -12,7 +12,7 @@ public class MatchFactory(IServiceProvider serviceProvider)
     /// <summary>
     /// Creates a new match with the given participants and an optional match number.
     /// </summary>
-    public StandardMatchViewModel NewStandardMatch(StandardPlayerViewModel left, StandardPlayerViewModel right, int? number = null)
+    public StandardMatchViewModel NewStandardMatch(SinglePlayerViewModel left, SinglePlayerViewModel right, int? number = null)
     {
         var match = serviceProvider.GetRequiredService<StandardMatchViewModel>();
         match.Number = number;
@@ -23,11 +23,11 @@ public class MatchFactory(IServiceProvider serviceProvider)
     /// <summary>
     /// Creates a new set of scores for a match
     /// </summary>
-    public LeftRightViewModel<T> NewScores<T>(T left, T right) where T : ParticipantViewModel
+    public LeftRightViewModel NewScores(ParticipantViewModel left, ParticipantViewModel right)
     {
-        var scores = serviceProvider.GetRequiredService<LeftRightViewModel<T>>();
-        scores.Left = NewScore(left);
-        scores.Right = NewScore(right);
+        var scores = serviceProvider.GetRequiredService<LeftRightViewModel>();
+        scores.Left = NewSide(left);
+        scores.Right = NewSide(right);
         return scores;
     }
 
@@ -36,7 +36,7 @@ public class MatchFactory(IServiceProvider serviceProvider)
     /// </summary>
     /// <param name="participant"></param>
     /// <returns></returns>
-    public static SideViewModel<T> NewScore<T>(T participant) where T : ParticipantViewModel => new()
+    public static SideViewModel NewSide(ParticipantViewModel participant) => new()
     {
         Participant = participant
     };
@@ -45,7 +45,7 @@ public class MatchFactory(IServiceProvider serviceProvider)
     /// Creates a new match with the given participants and seeds. This is used for creating matches from a ranked list of participants,
     /// where some participants may have byes. If a participant is null, it will be treated as a bye.
     /// </summary>
-    public BracketMatchViewModel NewSeededStandardMatch<T>(StandardPlayerViewModel? left, int leftSeed, StandardPlayerViewModel? right, int rightSeed)
+    public BracketMatchViewModel NewSeededStandardMatch(SinglePlayerViewModel? left, int leftSeed, SinglePlayerViewModel? right, int rightSeed)
     {
         var match = serviceProvider.GetRequiredService<BracketMatchViewModel>();
         match.Match = serviceProvider.GetRequiredService<StandardMatchViewModel>();

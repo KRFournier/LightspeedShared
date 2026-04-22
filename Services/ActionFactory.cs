@@ -11,7 +11,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new clean action
     /// </summary>
-    public static ActionViewModel<T> NewClean<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewClean(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.Clean,
         Actor = sides.ToSide(actor),
@@ -22,7 +22,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new concession
     /// </summary>
-    public static ActionViewModel<T> NewConcession<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewConcession(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.Conceded,
         Actor = sides.ToSide(actor),
@@ -33,7 +33,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new disarm action
     /// </summary>
-    public static ActionViewModel<T> NewDisarm<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewDisarm(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.Disarm,
         Actor = sides.ToSide(actor),
@@ -44,7 +44,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new first contact action
     /// </summary>
-    public static ActionViewModel<T> NewFirstContact<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewFirstContact(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.FirstContact,
         Actor = sides.ToSide(actor),
@@ -55,7 +55,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new headshot action
     /// </summary>
-    public static ActionViewModel<T> NewHeadshot<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewHeadshot(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.Headshot,
         Actor = sides.ToSide(actor),
@@ -66,7 +66,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new headshot override action
     /// </summary>
-    public static ActionViewModel<T> NewHeadshotOverride<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewHeadshotOverride(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.HeadshotOverride,
         Actor = sides.ToSide(actor),
@@ -77,7 +77,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new indirect action
     /// </summary>
-    public static ActionViewModel<T> NewIndirect<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewIndirect(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.Indirect,
         Actor = sides.ToSide(actor),
@@ -88,7 +88,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new Out of Bounds action
     /// </summary>
-    public static ActionViewModel<T> NewOutOfBounds<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewOutOfBounds(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.OutOfBounds,
         Actor = sides.ToSide(actor),
@@ -99,7 +99,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new Overtime action
     /// </summary>
-    public static ActionViewModel<T> NewOvertime<T>(this LeftRightViewModel<T> sides) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewOvertime(this LeftRightViewModel sides) => new()
     {
         Type = ActionType.Overtime
     };
@@ -107,7 +107,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new priority action
     /// </summary>
-    public static ActionViewModel<T> NewPriority<T>(this LeftRightViewModel<T> sides, SideReference actor, int points) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewPriority(this LeftRightViewModel sides, SideReference actor, int points) => new()
     {
         Type = ActionType.Priority,
         Actor = sides.ToSide(actor),
@@ -118,7 +118,7 @@ public static class ActionFactory
     /// <summary>
     /// Creates a new return action
     /// </summary>
-    public static ActionViewModel<T> NewReturn<T>(this LeftRightViewModel<T> sides, SideReference actor) where T : ParticipantViewModel => new()
+    public static ActionViewModel NewReturn(this LeftRightViewModel sides, SideReference actor) => new()
     {
         Type = ActionType.Return,
         Actor = sides.ToSide(actor),

@@ -40,9 +40,9 @@ public partial class HonorViewModel : ObservableObject, IRecipient<HonorStateMes
         HonorAmount = message.Honor;
     }
 
-    public HonorViewModel(Guid participantGuid, IMessenger messenger)
+    public HonorViewModel(Guid participantGuid, IMessenger? messenger)
     {
-        messenger.Register(this, participantGuid);
+        messenger?.Register(this, participantGuid);
     }
 
     public override string ToString() => $"{HonorAmount} Honor";
